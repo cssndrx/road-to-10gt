@@ -1,0 +1,35 @@
+
+
+come up with all the examples
+
+'cost', 4358949844
+$45T USD
+
+'land', 393903093
+100M ha
+
+
+pprint takes
+
+{
+key: 'cost',
+value: blah 
+}
+
+
+returns 
+
+{
+	big: '$45T'
+	little: 'USD'
+}
+
+
+Syntax: 
+pprint(totalCost).big
+pprint(totalCost).little
+
+
+---
+
+todo: write some basic pprint
