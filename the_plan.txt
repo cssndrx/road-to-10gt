@@ -26,10 +26,21 @@ returns
 
 
 Syntax: 
-pprint(totalCost).big
-pprint(totalCost).little
+pprint('cost', totalCost).big
+pprint('cost', totalCost).little
 
 
 ---
 
 todo: write some basic pprint
+
+'cost'
+'land'
+'energy'
+'scale'
+
+
+
+add slider
+add multibutton
+fix spacing and sizing
