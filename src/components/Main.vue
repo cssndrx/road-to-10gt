@@ -57,7 +57,7 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
   v-for="solution in solutions"
   :key="solution"
   :hint="'$' + costPerTonEstimate(solution) + '/ton'"
-  :max="maxAlloc"
+  :max="maxAllocForSolution(solution)"
   :min="minAlloc"
   :thumb-size="16"
   thumb-label="always"
@@ -165,6 +165,7 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 
 import _ from "lodash";
 
+const BILLION = 1000000000;
 const TEN_BILLION = 10000000000;
 
   export default {
@@ -180,17 +181,21 @@ const TEN_BILLION = 10000000000;
       estimates(){
         // TODO(John): Return actual estimates.
         return {
-          cost: this.tonsAllocated.forests + this.tonsAllocated.dac,
-          land: this.tonsAllocated.soil + this.tonsAllocated.beccs,
-          energy: 10 * (this.tonsAllocated.soil + this.tonsAllocated.forests)
+          cost: this.solutions.reduce((acc, sol) => acc + this.totalCostEstimate(sol), 0),
+          land: this.solutions.reduce((acc, sol) => acc + this.landEstimate(sol), 0),
+          energy: this.solutions.reduce((acc, sol) => acc + this.energyEstimate(sol), 0),
         };
       },
       permanences(){
         // TODO(John): Return actual estimates.
+        const tonsCaptured = this.tonsAllocated.beccs + this.tonsAllocated.dac;
+        const permanentTons = (1 - (this.percentUtilization / 100)) * tonsCaptured;
+        const impermanentTons = (this.percentUtilization / 100) * tonsCaptured;
+
         return [
-          {name: '<50 years', value: this.tonsAllocated.soil + this.tonsAllocated.forests},
-          {name: '50-200 years', value: this.tonsAllocated.beccs * 2},
-          {name: '>200 years', value: this.tonsAllocated.dac},
+          {name: '<50 years', value: (this.tonsAllocated.forests / 2) + this.tonsAllocated.soil + impermanentTons * 0.5 },
+          {name: '50-200 years', value: (this.tonsAllocated.forests / 2) + impermanentTons * 0.1 + this.tonsAllocated.blueCarbon},
+          {name: '>200 years', value: this.tonsAllocated.enhancedWeathering + permanentTons + impermanentTons * 0.4},
         ];
       },
 
@@ -208,12 +213,14 @@ const TEN_BILLION = 10000000000;
 
       return {
         dimensions: ['cost', 'land', 'energy'],
-        solutions: ['forests', 'dac', 'beccs', 'soil'],
+        solutions: ['forests', 'dac', 'beccs', 'soil', 'blueCarbon', 'enhancedWeathering'],
         tonsAllocated: {
           forests: 0,
           dac: 0,
           beccs: 0,
-          soil: 0,          
+          soil: 0, 
+          blueCarbon: 0,
+          enhancedWeathering: 0        
         },
 
         minAlloc: 0,
@@ -225,25 +232,80 @@ const TEN_BILLION = 10000000000;
     },
 
     methods: {
-
+      maxAllocForSolution(sol) {
+        return {
+          forests: 3 * BILLION,
+          soil: 5 * BILLION,
+          beccs: TEN_BILLION,
+          dac: TEN_BILLION,
+          blueCarbon: BILLION,
+          enhancedWeathering: 4 * BILLION
+        }[sol]
+      },
       // Return the cost per ton (can be dynamic).
       costPerTonEstimate(sol){
         // TODO(John): Return actual estimates.
         return {
-          forests: 10,
-          beccs: 50,
-          dac: 100,
-          soil: 70
+          forests: 20,
+          beccs: this.tonsAllocated.beccs < 4 * BILLION ? 150 :  300,
+          dac: this.tonsAllocated.dac < BILLION ? 600 : Math.floor(600 * Math.pow(this.tonsAllocated.dac / BILLION, -0.5146)),
+          soil: 15,
+          enhancedWeathering: 80,
+          blueCarbon: 30
         }[sol];
       },
+      totalCostEstimate(sol) {
+        // integrating the cost functions above 
+        // (not sure if there's a JS way to do this)
+        const dacIntegrated = x => {
+          // integrating the polynomial DAC learning curve function
+          return 5.28995 * Math.pow(10, 7) * Math.pow(x, 0.4854);
+        };
 
+        return {
+          forests: 20 * this.tonsAllocated.forests,
+          soil: 15 * this.tonsAllocated.soil,
+          blueCarbon: 30 * this.tonsAllocated.blueCarbon,
+          enhancedWeathering: 80 * this.tonsAllocated.enhancedWeathering, 
+          dac: this.tonsAllocated.dac < BILLION ? 600 * this.tonsAllocated.dac : 600 * BILLION + (dacIntegrated(this.tonsAllocated.dac) - dacIntegrated(BILLION)),
+          beccs: this.tonsAllocated.beccs < 4 * BILLION ? 150 * this.tonsAllocated.beccs : 150 * 4 * BILLION + 600 * (this.tonsAllocated.beccs - 4 * BILLION)
+        }[sol]
+      },
+      landEstimate(sol) {
+        // all estimates in ha / ton
+        const dacLand = () => {
+          // fill in with Max help based on energy source
+          return 0;
+        };
+        return {
+          forests: 0.11 * this.tonsAllocated.forests,
+          soil: 8.35 * this.tonsAllocated.soil,
+          beccs: this.tonsAllocated.beccs < 4 * BILLION ? 0.003 * this.tonsAllocated.beccs :  0.003 * 4 * BILLION + 0.06 * (this.tonsAllocated.beccs - BILLION),
+          dac: dacLand(),
+          blueCarbon: (1 / 4.78) * this.tonsAllocated.blueCarbon,
+          enhancedWeathering: (0.61 / 1000) * this.tonsAllocated.enhancedWeathering
+        }[sol]
+      },
+      energyEstimate(sol) {
+        // all the dividing by BILLION due to conversion from GJ to EJ
+        return {
+          forests: 0,
+          soil: 0,
+          blueCarbon: 0,
+          beccs: - (8 / BILLION) * this.tonsAllocated.beccs,
+          dac: (6.88 / BILLION) * this.tonsAllocated.dac,
+          enhancedWeathering: (6 / BILLION) * this.tonsAllocated.enhancedWeathering
+        }[sol];
+      },
       // Pretty print solution string.
       pprintSolution(sol){
         return {
           forests: 'Forests',
           dac: 'DAC',
           beccs: 'BECCS',
-          soil: 'Soil'
+          soil: 'Soil',
+          blueCarbon: 'Blue Carbon',
+          enhancedWeathering: 'Enhanced Weathering'
         }[sol];
       },
 
