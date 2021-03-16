@@ -1,4 +1,20 @@
 
+NEWS
+
+Slider gets stuck when you hit a news item
+
+stopped here: how to make slider get stuck??
+want to wrap own <input>
+
+===
+
+TBD
+
+Might want to separate energy produced from energy consumed because otherwise it’s kinda misleading
+
+
+https://github.com/vuetifyjs/vuetify/issues/2384
+----
 
 come up with all the examples
 
@@ -44,3 +60,28 @@ todo: write some basic pprint
 add slider
 add multibutton
 fix spacing and sizing
+
+
+//       testing(newVal, oldVal){
+//           this.$nextTick(() => {this.testing = oldVal});
+//       },
+
+//       tonsAllocated: {
+
+//         handler(newVal, oldVal){
+//           if (this.snackbar){
+//             console.log('blocked');
+//             // Don't let the user update when newsitem is open.
+//             console.log('pre: ', JSON.stringify(this.newVal));
+//             this.tonsAllocated = oldVal;
+//             console.log('post: ', JSON.stringify(this.newVal));
+// //            this.$forceUpdate();
+
+
+//           } else {
+//             console.log('okay');
+//           }
+//         },
+//         deep: true
+//       },
+

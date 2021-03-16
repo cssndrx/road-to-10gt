@@ -43,6 +43,8 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 </div> 
 
 <div class="caps-label" v-for="dim in dimensions" :key="'label'+dim">{{dim}}</div>
+
+<div v-for="dim in dimensions" :key="'context'+dim">{{getContext(dim)}}</div>
 </section>
 
 
@@ -50,6 +52,17 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 <p class="bright" style="display:inline-block; margin-left: 16px;">Move the sliders until you achieve 10 Gigaton scale.</p>
 
 <section style="display:grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10%; grid-row-gap: 24px;">
+
+
+<!-- <v-slider
+  v-model="testing"
+  :max="100"
+  :min="0"
+  :disabled="snackbar"
+  thumb-label="always"
+  style="min-width: 200px"
+  persistent-hint
+></v-slider> -->
 
 <!-- https://vuetifyjs.com/en/api/v-slider/#slots -->
 <v-slider
@@ -60,6 +73,7 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
   :max="maxAllocForSolution(solution)"
   :min="minAlloc"
   :thumb-size="16"
+  :disabled="snackbar"
   thumb-label="always"
   style="min-width: 200px"
   persistent-hint
@@ -70,6 +84,24 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 <span slot="thumb-label">{{pprint('scale', tonsAllocated[solution]).big}}T</span>
 
 </v-slider>
+
+
+<!-- <input
+type="range"
+  v-model="tonsAllocated[solution]"
+  v-for="solution in solutions"
+  :key="solution"
+  :hint="'$' + costPerTonEstimate(solution) + '/ton'"
+  :max="maxAllocForSolution(solution)"
+  :min="minAlloc"
+  :thumb-size="16"
+  :disabled="snackbar"
+  thumb-label="always"
+  style="min-width: 200px"
+  persistent-hint
+/> -->
+ 
+
 </section>
 
 
@@ -114,7 +146,9 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 
 
 <h3 class="mt-5">Simulated news</h3>
-<div class="news" v-for="newsItem in newsItems" :key="newsItem">{{newsItem}}</div>
+<div class="news" v-for="newsItem in newsItems" :key="newsItem.text" :style="{color: newsItem.color}">
+{{newsItem.text}}
+</div>
 
 
 <v-row >
@@ -158,6 +192,58 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 
 
     </v-row>
+
+
+
+    <v-snackbar
+      v-model="snackbar"
+    >
+      {{ snackbarText }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          :color="snackbarColor"
+          text
+          v-bind="attrs"
+          @click="snackbar = false"
+        >
+          Accept
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+
+    <v-dialog
+      v-model="dialog"
+      width="500"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          You win!
+        </v-card-title>
+
+        <v-card-text>
+          <p>
+          TODO(John): Debrief solution here
+          </p>
+          <p>
+            Congratulations! You hit 10 GT but…
+          </p>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="dialog = false"
+          >
+            Play again
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -201,17 +287,83 @@ const TEN_BILLION = 10000000000;
 
       newsItems(){
         // TODO(John): Add logic to return the right news items based on the values of the data variables.
-        return [
-          '2030: Food prices rising due to BECCS competition for land!',
-          '2030: You’ve catalyzed a movement of farmers in the Corn Belt to move to regenerative agriculture!'
+
+        // '2030: Food prices rising due to BECCS competition for land!',
+        // '2030: You’ve catalyzed a movement of farmers in the Corn Belt to move to regenerative agriculture!',
+
+        const possibleNewsItems = [
+          {
+            condition: this.tonsAllocated.forests > 1000000,
+            text: 'You have unlocked forest achievement',
+            color: 'green'
+          },
+
+          {
+            condition: this.estimates.energy > 1,
+            text: 'Oh dear, you are using lots of energy',
+            color: 'yellow'
+          },
         ];
+        return possibleNewsItems.filter(item => item.condition);
+
+      },
+
+      // TODO(John): fill in actual constraints.
+      constraintsViolated(){
+          const constraints = [
+          {
+            condition: this.estimates.energy > 2,
+            text: 'Too much energy!',
+            color: 'red'
+          },
+          {
+            condition: this.estimates.cost > 2,
+            text: 'Too much money!',
+            color: 'red'
+          },
+          {
+            condition: this.estimates.land > 2,
+            text: 'Too much land!',
+            color: 'red'
+          },                    
+          ];
+          return constraints.filter(item => item.condition);
       }
 
 
     },
+    watch: {
+      constraintsViolated(violated){
+        violated.forEach(constraint => this.setAlert(constraint.text, constraint.color));
+      },
+
+      tonsSequestered(){
+        if (this.tonsSequestered > TEN_BILLION){
+          // this.dialog = true;
+        }
+      },
+      newsItems(newNews, oldNews){
+        const olds = _.map(oldNews, 'text');
+        const news  = _.map(newNews, 'text');
+        const additions = _.difference(news, olds);
+
+        if (additions.length > 1){
+          console.error('Expected only one additional news item, but got: ' + additions.length + '. Try staggering the thresholds for news items differently');
+        }
+
+        // Turn the additions into toasts
+        if (additions.length == 1){
+          const text = additions[0];
+          const color = newNews.filter(news => news.text === text)[0].color;
+          this.setAlert(text, color);
+        }
+      }
+    },
     data(){
 
-      return {
+      return {    
+        testing: 0, 
+
         dimensions: ['cost', 'land', 'energy'],
         solutions: ['forests', 'dac', 'beccs', 'soil', 'blueCarbon', 'enhancedWeathering'],
         tonsAllocated: {
@@ -228,10 +380,31 @@ const TEN_BILLION = 10000000000;
 
         dacEnergySource: 'csp',
         percentUtilization: 50,
+
+        // The bottom of screen snackbar toasts for news items.
+        snackbar: false,
+        snackbarText: 'This is a test',
+        snackbarColor: 'green',
+
+        // The end game dialog.
+        dialog: false,
       }
     },
 
     methods: {
+      // Set a blocking alert.
+      setAlert(text, color){
+        this.snackbarColor = color;
+        this.snackbarText = text;
+        this.snackbar = true;          
+      },
+      getContext(dim){
+        // TODO(John): Return string with context for string dim ('cost', 'energy', 'land')
+        // You can look up the values using this.estimates[dim]
+        if (dim){
+          return 'Context goes here';
+        }
+      },
       maxAllocForSolution(sol) {
         return {
           forests: 3 * BILLION,
@@ -338,7 +511,7 @@ const TEN_BILLION = 10000000000;
             return (value / lim.limit).toFixed(1) + lim.suffix;
           }
         }
-        return value.toString();
+        return value.toFixed(1).toString();
       },
 
     }
