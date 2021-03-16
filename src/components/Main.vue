@@ -35,7 +35,7 @@ Your solution has <span class="bright" style="font-size: 1em;">medium permanence
 
 
 
-<section class="mt-10" style="display:grid; grid-template-columns: 1fr 1fr 1fr;">
+<section class="mt-10" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr;">
 
 <div v-for="dim in dimensions" :key="dim">
   <span class="big">{{pprint(dim, estimates[dim]).big}}</span>
@@ -269,7 +269,9 @@ const TEN_BILLION = 10000000000;
         return {
           cost: this.solutions.reduce((acc, sol) => acc + this.totalCostEstimate(sol), 0),
           land: this.solutions.reduce((acc, sol) => acc + this.landEstimate(sol), 0),
-          energy: this.solutions.reduce((acc, sol) => acc + this.energyEstimate(sol), 0),
+          energyConsumed: this.solutions.reduce((acc, sol) => acc + this.energyConsumedEstimate(sol), 0),
+          energyProduced: this.solutions.reduce((acc, sol) => acc + this.energyProducedEstimate(sol), 0),
+
         };
       },
       permanences(){
@@ -299,7 +301,7 @@ const TEN_BILLION = 10000000000;
           },
 
           {
-            condition: this.estimates.energy > 1,
+            condition: this.estimates.energyConsumed > 1,
             text: 'Oh dear, you are using lots of energy',
             color: 'yellow'
           },
@@ -312,7 +314,7 @@ const TEN_BILLION = 10000000000;
       constraintsViolated(){
           const constraints = [
           {
-            condition: this.estimates.energy > 2,
+            condition: this.estimates.energyConsumed > 2,
             text: 'Too much energy!',
             color: 'red'
           },
@@ -339,7 +341,7 @@ const TEN_BILLION = 10000000000;
 
       tonsSequestered(){
         if (this.tonsSequestered > TEN_BILLION){
-          // this.dialog = true;
+          this.dialog = true;
         }
       },
       newsItems(newNews, oldNews){
@@ -364,7 +366,7 @@ const TEN_BILLION = 10000000000;
       return {    
         testing: 0, 
 
-        dimensions: ['cost', 'land', 'energy'],
+        dimensions: ['cost', 'land', 'energyConsumed', 'energyProduced'],
         solutions: ['forests', 'dac', 'beccs', 'soil', 'blueCarbon', 'enhancedWeathering'],
         tonsAllocated: {
           forests: 0,
@@ -459,7 +461,7 @@ const TEN_BILLION = 10000000000;
           enhancedWeathering: (0.61 / 1000) * this.tonsAllocated.enhancedWeathering
         }[sol]
       },
-      energyEstimate(sol) {
+      energyConsumedEstimate(sol) {
         // all the dividing by BILLION due to conversion from GJ to EJ
         return {
           forests: 0,
@@ -470,6 +472,18 @@ const TEN_BILLION = 10000000000;
           enhancedWeathering: (6 / BILLION) * this.tonsAllocated.enhancedWeathering
         }[sol];
       },
+
+      energyProducedEstimate(sol) {
+        // all the dividing by BILLION due to conversion from GJ to EJ
+        return {
+          forests: 0,
+          soil: 0,
+          blueCarbon: 0,
+          beccs: - (8 / BILLION) * this.tonsAllocated.beccs,
+          dac: (6.88 / BILLION) * this.tonsAllocated.dac,
+          enhancedWeathering: (6 / BILLION) * this.tonsAllocated.enhancedWeathering
+        }[sol];
+      },      
       // Pretty print solution string.
       pprintSolution(sol){
         return {
@@ -488,7 +502,8 @@ const TEN_BILLION = 10000000000;
           scale: 'tons',
           cost: 'USD',
           land: 'ha',
-          energy: 'EJ'
+          energyConsumed: 'EJ',
+          energyProduced: 'EJ',
         };
 
         const prefix = key === 'cost' ? '$' : '';
