@@ -117,25 +117,6 @@ type="range"
 					{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}% sequestered
 				</div>
 			</v-col>
-
-			<v-col>
-				<p class="bright">Energy sources for DAC</p>
-
-				<v-btn-toggle v-model="dacEnergySource" shaped mandatory>
-					<v-btn value="natural gas">
-						Nat Gas
-					</v-btn>
-					<v-btn value="geothermal">
-						Geothermal
-					</v-btn>
-					<v-btn value="nuclear">
-						Nuclear
-					</v-btn>
-					<v-btn value="csp">
-						CSP
-					</v-btn>
-				</v-btn-toggle>
-			</v-col>
 		</v-row>
 
 		<h3 class="mt-5">Simulated news</h3>
@@ -462,7 +443,6 @@ export default {
 			minAlloc: 0,
 			maxAlloc: TEN_BILLION,
 
-			dacEnergySource: "natural gas",
 			percentUtilization: 50,
 
 			// The bottom of screen snackbar toasts for news items.
@@ -493,37 +473,18 @@ export default {
 					1
 				)}% of United States GDP in 2020`;
 			} else if (dim === "land") {
-				const landBreakpoints = {
-					14: "New York",
-					70: "Texas",
-					550: "the Amazon Rainforest",
-				};
-				for (let breakpoint of Object.keys(landBreakpoints)
-					.map(x => parseInt(x))
-					.sort((x, y) => x < y)) {
-					if (this.estimates[dim] < breakpoint * MILLION) {
-						return `~${Math.round(
-							(100 * this.estimates[dim]) / (breakpoint * MILLION)
-						)}% the land area of ${landBreakpoints[breakpoint]}`;
-					}
-				}
+				return `~${Number((100 * this.estimates[dim]) / (328.7 * MILLION)).toFixed(
+					1
+				)}% the land area of India`;
 			} else if (dim === "energyUsed" || dim === "energyProduced") {
-				const energyBreakpoints = {
-					6.61: "California",
-					31.7: "Europe",
-					105.7: "the United States",
-				};
-				for (let breakpoint of Object.keys(energyBreakpoints)
-					.map(x => parseFloat(x))
-					.sort((x, y) => x < y)) {
-					if (this.estimates[dim] < breakpoint) {
-						return `${
-							dim === "energyUsed" ? "You're using " : "You're generating"
-						} about ${Math.round(
-							(100 * this.estimates[dim]) / breakpoint
-						)}% of annual energy consumption in ${energyBreakpoints[breakpoint]}`;
-					}
-				}
+				// const energyBreakpoints = {
+				// 	6.61: "California",
+				// 	31.7: "Europe",
+				// 	105.7: "the United States",
+				// };
+				return `~${Number((100 * this.estimates[dim]) / 31.7).toFixed(
+					1
+				)}% the annual energy consumption of Europe`;
 			} else {
 				return "";
 			}
@@ -579,20 +540,6 @@ export default {
 		},
 		landEstimate(sol) {
 			// all estimates in ha / ton
-			const dacLandCoeff = () => {
-				// fill in with Max help based on energy source
-				switch (this.dacEnergySource) {
-					case "csp":
-						return Math.pow(1.14038, -3);
-					case "nuclear":
-						return Math.pow(2.00823, -4);
-					case "geothermal":
-						return Math.pow(1.17633, -4);
-					case "natural gas":
-					default:
-						return Math.pow(2.87904, -4);
-				}
-			};
 			return {
 				forests: 0.11 * this.tonsAllocated.forests,
 				soil: 0, // no additional land use
@@ -600,7 +547,7 @@ export default {
 					this.tonsAllocated.beccs < 4 * BILLION
 						? 0.003 * this.tonsAllocated.beccs
 						: 0.003 * 4 * BILLION + 0.06 * (this.tonsAllocated.beccs - 4 * BILLION),
-				dac: this.tonsAllocated.dac * dacLandCoeff(),
+				dac: this.tonsAllocated.dac * Math.pow(2.87904, -4),
 				blueCarbon: (1 / 4.78) * this.tonsAllocated.blueCarbon,
 				enhancedWeathering: (0.61 / 1000) * this.tonsAllocated.enhancedWeathering,
 			}[sol];
