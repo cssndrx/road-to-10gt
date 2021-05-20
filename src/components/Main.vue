@@ -20,7 +20,7 @@
 				<div>
 					Your solution has
 					<span class="bright" style="font-size: 1em;"
-						>{{ getPermanenceLabel() }} permanence</span
+						>{{ permanenceLabel }} permanence</span
 					>
 					<div style="display:grid; grid-template-columns: 1fr 1fr 1fr">
 						<div v-for="perm in permanences" :key="'val' + perm.name">
@@ -74,7 +74,7 @@
 			</v-slider>
 		</section>
 
-		<v-row class="mt-10" v-if="phaseInd >= 2">
+		<v-row class="mt-10" v-if="phaseInd >= 1">
 			<v-col>
 				<p class="bright">How is the captured CO2 used?</p>
 				<v-slider
@@ -210,24 +210,14 @@
 				</v-card-title>
 
 				<v-card-text>
-					<h3 v-if="!isLastPhase">
-						Congratulations! You reached 10 Gigatons in the
-						{{ phaseNames[phaseInd] }} phase.
-					</h3>
-					<h3 v-else>
-						Congratulations! You won the game.
+					<h3>
+						{{ headerCongratsMessage }}
 					</h3>
 
-					<p>
-						...Describe the phase you won and the next phase...
-					</p>
-
-					<br />
-					<h4>
-						Note: {{ parseInt((100 * permanences[2].value) / tonsSequestered) }}% of the
-						CO2 you removed has been stored long-term, but the rest will be re-emitted
-						back into the atmosphere.
-					</h4>
+					<div v-for="msg in congratulationsMessage" :key="'msg' + msg[0]">
+						<br />
+						<p>{{ msg }}</p>
+					</div>
 					<br />
 				</v-card-text>
 
@@ -259,6 +249,23 @@ export default {
 		tonsSequestered() {
 			return _.sum(_.values(this.tonsAllocated));
 		},
+		permanenceLabel() {
+			const perms = this.permanences;
+			const sum = perms.reduce((acc, x) => acc + x.value, 0);
+			const fracs = perms.map(x => (sum === 0 ? 0 : x.value / sum));
+			const weighted = Math.round(fracs[0] * 1 + fracs[1] * 2 + fracs[2] * 3);
+			switch (weighted) {
+				case 1:
+					return "low";
+				case 2:
+					return "medium";
+				case 3:
+					return "high";
+				default:
+					return "medium";
+			}
+		},
+
 		isWin() {
 			if (this.tonsSequestered < TEN_BILLION) {
 				return false;
@@ -269,6 +276,9 @@ export default {
 
 			if (this.phaseInd >= 1) {
 				// Fail on Phase 1 conditions...
+				if (this.permanenceLabel !== "high") {
+					return false;
+				}
 				if (this.phaseInd >= 2) {
 					// Fail on Phase 2 conditions...
 				}
@@ -279,7 +289,7 @@ export default {
 			// TODO(John): Return actual estimates.
 			return {
 				cost: _.sumBy(this.solutions, this.totalCostEstimate),
-				land: _.sumBy(this.solutions, this.landEstimate),
+				repurposedLand: _.sumBy(this.solutions, this.landEstimate),
 				energyUsed: _.sumBy(this.solutions, this.energyUsedEstimate),
 				energyProduced: _.sumBy(this.solutions, this.energyProducedEstimate),
 			};
@@ -314,6 +324,29 @@ export default {
 				},
 			];
 		},
+		headerCongratsMessage() {
+			if (this.phaseInd === 0) {
+				return "Congratulations! You reached 10 Gigatons with no major negative consequences! However...";
+			} else if (this.phaseInd === 1) {
+				return "Congratulations! You reached 10 Gigatons with no major negative consequences, and with a high permanence solution. You win!";
+			}
+			return "";
+		},
+		congratulationsMessage() {
+			if (this.phaseInd === 0) {
+				return [
+					`Only ${parseInt(
+						(100 * this.permanences[2].value) / this.tonsSequestered
+					)}% of the CO2 you removed has been stored long-term, and the rest will be re-emitted back into the atmosphere. In this next phase, modify your solution to be “high permanence”. You can monitor the permanence of your solution at top of the screen.`,
+					`Right now, half of the CO2 captured via DAC and BECCS is being stored permanently, but the other half is being used to make products that will be profitable and bring money into the industry, but will also release that CO2 back into the atmosphere on a short timeframe. You get modify the amount of CO2 being sequestered vs utilized with a new slider at the bottom of the screen.`,
+				];
+			} else if (this.phaseInd === 1) {
+				return [
+					`Right now your solution costs $${this.estimates["cost"]}, converts ${this.estimates["repurposedLand"]} hectares of land to carbon removal, and uses ${this.estimates["energyUsed"]} exajoules of energy. Think you can do better? Give it another try!`,
+				];
+			}
+			return [];
+		},
 
 		newsItems() {
 			// TODO(John): Add logic to return the right news items based on the values of the data variables.
@@ -329,14 +362,20 @@ export default {
 				},
 				{
 					condition: this.tonsAllocated.forests > 2 * BILLION,
-					text: "Trees introduced for carbon removal are invasive species in Indonesia!",
-					color: "red",
+					text:
+						"Some trees introduced for carbon removal have become an invasive species.",
+					color: "yellow",
 				},
 				{
 					condition: this.tonsAllocated.forests > 2.5 * BILLION,
 					text:
 						"Wildfires burn down many of the trees that were used for carbon removal, releasing that CO2 back into the atmosphere!",
-					color: "red",
+					color: "yellow",
+				},
+				{
+					condition: this.tonsAllocated.soil > 0.5 * BILLION,
+					text: "Soil health already improving dramatically.",
+					color: "green",
 				},
 				{
 					condition: this.tonsAllocated.soil > 1.5 * BILLION,
@@ -354,6 +393,12 @@ export default {
 					condition: this.tonsAllocated.soil > 3 * BILLION,
 					text:
 						"Large groups of farmers begin to till their land again, releasing much of the carbon stored in these soils back into the atmosphere!",
+					color: "yellow",
+				},
+				{
+					condition: this.tonsAllocated.soil > 4 * BILLION,
+					text:
+						"Land used for soil carbon sequestration is beginning to release methane into the atmosphere.",
 					color: "red",
 				},
 				{
@@ -363,15 +408,21 @@ export default {
 					color: "green",
 				},
 				{
+					condition: this.tonsAllocated.beccs > 3 * BILLION,
+					text:
+						"Running out of waste biomass to use for BECCS, so beginning to switch to growing dedicated energy crops. This will require much more land...",
+					color: "yellow",
+				},
+				{
 					condition: this.tonsAllocated.beccs > 6.5 * BILLION,
 					text:
 						"Despite using vast amounts of land to cultivate dedicated energy crops, BECCS provides enough energy to meet half of the US’s energy demand!",
 					color: "yellow",
 				},
 				{
-					condition: this.estimates.land > 1.2 * Math.pow(10, 8),
+					condition: this.estimates.repurposedLand > 1.2 * Math.pow(10, 8),
 					text:
-						"Food prices skyrocket and food scarcity becomes a major worldwide problem as carbon removal takes up increasing land area.",
+						"Too much land usage! Food prices skyrocket and food scarcity becomes a major worldwide problem as carbon removal takes up increasing land area.",
 					color: "red",
 				},
 				{
@@ -399,15 +450,16 @@ export default {
 					color: "green",
 				},
 				{
-					condition: this.tonsAllocated.enhancedWeathering > 2,
-					text: "Agricultural yields increase from added mineral nutrients!",
-					color: "green",
+					condition: this.tonsAllocated.enhancedWeathering > 1 * BILLION,
+					text:
+						"Mining of rocks for weathering is already on the order of billions of tons, and grinding of the mined rock also requires very substantial energy.",
+					color: "yellow",
 				},
 				{
-					condition: this.tonsAllocated.soil > 4 * BILLION,
+					condition: this.tonsAllocated.enhancedWeathering > 2 * BILLION,
 					text:
-						"Land used for soil carbon sequestration has started to release methane into the atmosphere!",
-					color: "red",
+						"Agricultural yields increase from added mineral nutrients, which also help provide crops protection from pests and diseases.",
+					color: "green",
 				},
 				{
 					condition: this.estimates.energyUsed > 53,
@@ -435,16 +487,18 @@ export default {
 	},
 	watch: {
 		isWin() {
-			this.dialog = true;
+			if (this.isWin) {
+				this.dialog = true;
+			}
 		},
 	},
 
 	data() {
 		return {
-			phaseNames: ["intro", "permanence", "utilization"],
+			phaseNames: ["intro", "permanence"],
 			phaseInd: 0,
 
-			dimensions: ["cost", "land", "energyUsed", "energyProduced"],
+			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
 			tonsAllocated: {
 				forests: 0,
@@ -476,7 +530,7 @@ export default {
 				return `~${Number((100 * this.estimates[dim]) / (21 * Math.pow(10, 12))).toFixed(
 					1
 				)}% of United States GDP in 2020`;
-			} else if (dim === "land") {
+			} else if (dim === "repurposedLand") {
 				return `~${Number((100 * this.estimates[dim]) / (328.7 * MILLION)).toFixed(
 					1
 				)}% the land area of India`;
@@ -502,22 +556,6 @@ export default {
 				blueCarbon: BILLION,
 				enhancedWeathering: 4 * BILLION,
 			}[sol];
-		},
-		getPermanenceLabel() {
-			const perms = this.permanences;
-			const sum = perms.reduce((acc, x) => acc + x.value, 0);
-			const fracs = perms.map(x => (sum === 0 ? 0 : x.value / sum));
-			const weighted = Math.round(fracs[0] * 1 + fracs[1] * 2 + fracs[2] * 3);
-			switch (weighted) {
-				case 1:
-					return "low";
-				case 2:
-					return "medium";
-				case 3:
-					return "high";
-				default:
-					return "medium";
-			}
 		},
 		// Return the cost per ton (can be dynamic).
 		costPerTonEstimate(sol) {
@@ -568,7 +606,7 @@ export default {
 						? 0.003 * this.tonsAllocated.beccs
 						: 0.003 * 4 * BILLION + 0.06 * (this.tonsAllocated.beccs - 4 * BILLION),
 				dac: this.tonsAllocated.dac * Math.pow(2.87904, -4),
-				blueCarbon: (1 / 4.78) * this.tonsAllocated.blueCarbon,
+				blueCarbon: 0, //(1 / 4.78) * this.tonsAllocated.blueCarbon,
 				enhancedWeathering: (0.61 / 1000) * this.tonsAllocated.enhancedWeathering,
 			}[sol];
 		},
@@ -612,7 +650,7 @@ export default {
 			const littles = {
 				scale: "tons",
 				cost: "USD",
-				land: "ha",
+				repurposedLand: "ha",
 				energyUsed: "EJ",
 				energyProduced: "EJ",
 			};
