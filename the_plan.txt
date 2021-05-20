@@ -1,3 +1,20 @@
+UI:
+Change land to Land Converted to CDR
+
+sliders:
+Different color for each slider
+Sliders shouldn’t have equal length bc they have different max scaling
+
+
+
+===
+
+don't touch ugly today!!!
+
+
+===
+
+
 
 NEWS
 
@@ -6,14 +23,10 @@ Slider gets stuck when you hit a news item
 stopped here: how to make slider get stuck??
 want to wrap own <input>
 
-===
-
-TBD
-
-Might want to separate energy produced from energy consumed because otherwise it’s kinda misleading
-
 
 https://github.com/vuetifyjs/vuetify/issues/2384
+
+
 ----
 
 come up with all the examples

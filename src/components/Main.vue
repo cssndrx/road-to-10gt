@@ -16,7 +16,7 @@
 
 			<v-col cols="1"></v-col>
 
-			<v-col cols="6">
+			<v-col cols="6" v-if="phaseInd > 0">
 				<div>
 					Your solution has
 					<span class="bright" style="font-size: 1em;"
@@ -56,17 +56,6 @@
 		<section
 			style="display:grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10%; grid-row-gap: 24px;"
 		>
-			<!-- <v-slider
-  v-model="testing"
-  :max="100"
-  :min="0"
-  :disabled="snackbar"
-  thumb-label="always"
-  style="min-width: 200px"
-  persistent-hint
-></v-slider> -->
-
-			<!-- https://vuetifyjs.com/en/api/v-slider/#slots -->
 			<v-slider
 				v-model="tonsAllocated[solution]"
 				v-for="solution in solutions"
@@ -75,7 +64,6 @@
 				:max="maxAllocForSolution(solution)"
 				:min="minAlloc"
 				:thumb-size="16"
-				:disabled="snackbar"
 				thumb-label="always"
 				style="min-width: 200px"
 				persistent-hint
@@ -84,24 +72,9 @@
 
 				<span slot="thumb-label">{{ pprint("scale", tonsAllocated[solution]).big }}T</span>
 			</v-slider>
-
-			<!-- <input
-type="range"
-  v-model="tonsAllocated[solution]"
-  v-for="solution in solutions"
-  :key="solution"
-  :hint="'$' + costPerTonEstimate(solution) + '/ton'"
-  :max="maxAllocForSolution(solution)"
-  :min="minAlloc"
-  :thumb-size="16"
-  :disabled="snackbar"
-  thumb-label="always"
-  style="min-width: 200px"
-  persistent-hint
-/> -->
 		</section>
 
-		<v-row class="mt-10">
+		<v-row class="mt-10" v-if="phaseInd >= 2">
 			<v-col>
 				<p class="bright">How is the captured CO2 used?</p>
 				<v-slider
@@ -121,12 +94,33 @@ type="range"
 			</v-col>
 		</v-row>
 
-		<h3 class="mt-5">Simulated news</h3>
+		<h3 class="mt-5" v-if="newsItems.length > 0">With your current setup</h3>
+		<div v-if="dealbreakers.length > 0">Dealbreakers (you must resolve these to win):</div>
 		<div
 			class="news"
-			v-for="newsItem in newsItems"
+			v-for="newsItem in dealbreakers"
 			:key="newsItem.text"
-			:style="{ color: newsItem.color }"
+			:style="{ color: 'red' }"
+		>
+			{{ newsItem.text }}
+		</div>
+
+		<div v-if="warnings.length > 0">Warnings:</div>
+		<div
+			class="news"
+			v-for="newsItem in warnings"
+			:key="newsItem.text"
+			:style="{ color: 'yellow' }"
+		>
+			{{ newsItem.text }}
+		</div>
+
+		<div v-if="goodNews.length > 0">Good news:</div>
+		<div
+			class="news"
+			v-for="newsItem in goodNews"
+			:key="newsItem.text"
+			:style="{ color: 'green' }"
 		>
 			{{ newsItem.text }}
 		</div>
@@ -209,16 +203,6 @@ type="range"
 			</v-col>
 		</v-row>
 
-		<v-snackbar v-model="snackbar">
-			{{ snackbarText }}
-
-			<template v-slot:action="{ attrs }">
-				<v-btn :color="snackbarColor" text v-bind="attrs" @click="snackbar = false">
-					Accept
-				</v-btn>
-			</template>
-		</v-snackbar>
-
 		<v-dialog v-model="dialog" width="500">
 			<v-card>
 				<v-card-title class="headline">
@@ -226,9 +210,17 @@ type="range"
 				</v-card-title>
 
 				<v-card-text>
-					<h3>
-						Congratulations! You reached 10 Gigatons.
+					<h3 v-if="!isLastPhase">
+						Congratulations! You reached 10 Gigatons in the
+						{{ phaseNames[phaseInd] }} phase.
 					</h3>
+					<h3 v-else>
+						Congratulations! You won the game.
+					</h3>
+
+					<p>
+						...Describe the phase you won and the next phase...
+					</p>
 
 					<br />
 					<h4>
@@ -237,20 +229,14 @@ type="range"
 						back into the atmosphere.
 					</h4>
 					<br />
-					<h3>Here's what happened globally due to your carbon removal scale-up:</h3>
-					<div
-						class="news"
-						v-for="newsItem in newsItems"
-						:key="newsItem.text"
-						:style="{ color: newsItem.color }"
-					>
-						{{ newsItem.text }}
-					</div>
 				</v-card-text>
 
 				<v-card-actions>
 					<v-spacer></v-spacer>
-					<v-btn color="primary" text @click="dialog = false">
+					<v-btn color="primary" text @click="nextPhase()" v-if="!isLastPhase">
+						Proceed to {{ phaseNames[phaseInd + 1] }} phase;
+					</v-btn>
+					<v-btn color="primary" text @click="resetGame()" v-else>
 						Play again
 					</v-btn>
 				</v-card-actions>
@@ -273,20 +259,29 @@ export default {
 		tonsSequestered() {
 			return _.sum(_.values(this.tonsAllocated));
 		},
+		isWin() {
+			if (this.tonsSequestered < TEN_BILLION) {
+				return false;
+			}
+			if (this.dealbreakers.length > 0) {
+				return false;
+			}
 
+			if (this.phaseInd >= 1) {
+				// Fail on Phase 1 conditions...
+				if (this.phaseInd >= 2) {
+					// Fail on Phase 2 conditions...
+				}
+			}
+			return true;
+		},
 		estimates() {
 			// TODO(John): Return actual estimates.
 			return {
-				cost: this.solutions.reduce((acc, sol) => acc + this.totalCostEstimate(sol), 0),
-				land: this.solutions.reduce((acc, sol) => acc + this.landEstimate(sol), 0),
-				energyUsed: this.solutions.reduce(
-					(acc, sol) => acc + this.energyUsedEstimate(sol),
-					0
-				),
-				energyProduced: this.solutions.reduce(
-					(acc, sol) => acc + this.energyProducedEstimate(sol),
-					0
-				),
+				cost: _.sumBy(this.solutions, this.totalCostEstimate),
+				land: _.sumBy(this.solutions, this.landEstimate),
+				energyUsed: _.sumBy(this.solutions, this.energyUsedEstimate),
+				energyProduced: _.sumBy(this.solutions, this.energyProducedEstimate),
 			};
 		},
 		permanences() {
@@ -424,57 +419,30 @@ export default {
 			return possibleNewsItems.filter(item => item.condition);
 		},
 
-		// TODO(John): fill in actual constraints.
-		constraintsViolated() {
-			const constraints = [
-				// {
-				// 	condition: this.estimates.cost > 2,
-				// 	text: "Too much money!",
-				// 	color: "red",
-				// },
-				// {
-				// 	condition: this.estimates.land > 2,
-				// 	text: "Too much land!",
-				// 	color: "red",
-				// },
-			];
-			return constraints.filter(item => item.condition);
+		goodNews() {
+			return this.newsItems.filter(_ => _.color === "green");
+		},
+		warnings() {
+			return this.newsItems.filter(_ => _.color === "yellow");
+		},
+		dealbreakers() {
+			return this.newsItems.filter(_ => _.color === "red");
+		},
+
+		isLastPhase() {
+			return this.phaseInd == this.phaseNames.length - 1;
 		},
 	},
 	watch: {
-		constraintsViolated(violated) {
-			violated.forEach(constraint => this.setAlert(constraint.text, constraint.color));
-		},
-
-		tonsSequestered() {
-			if (this.tonsSequestered > TEN_BILLION) {
-				this.dialog = true;
-			}
-		},
-		newsItems(newNews, oldNews) {
-			const olds = _.map(oldNews, "text");
-			const news = _.map(newNews, "text");
-			const additions = _.difference(news, olds);
-
-			if (additions.length > 1) {
-				console.error(
-					"Expected only one additional news item, but got: " +
-						additions.length +
-						". Try staggering the thresholds for news items differently"
-				);
-			}
-
-			// Turn the additions into toasts
-			if (additions.length == 1) {
-				const text = additions[0];
-				const color = newNews.filter(news => news.text === text)[0].color;
-				this.setAlert(text, color);
-			}
+		isWin() {
+			this.dialog = true;
 		},
 	},
+
 	data() {
 		return {
-			testing: 0,
+			phaseNames: ["intro", "permanence", "utilization"],
+			phaseInd: 0,
 
 			dimensions: ["cost", "land", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
@@ -492,23 +460,12 @@ export default {
 
 			percentUtilization: 50,
 
-			// The bottom of screen snackbar toasts for news items.
-			snackbar: false,
-			snackbarText: "This is a test",
-			snackbarColor: "green",
-
 			// The end game dialog.
 			dialog: false,
 		};
 	},
 
 	methods: {
-		// Set a blocking alert.
-		setAlert(text, color) {
-			this.snackbarColor = color;
-			this.snackbarText = text;
-			this.snackbar = true;
-		},
 		getContext(dim) {
 			// TODO(John): Return string with context for string dim ('cost', 'energy', 'land')
 			// You can look up the values using this.estimates[dim]
@@ -607,7 +564,7 @@ export default {
 				forests: 0.11 * this.tonsAllocated.forests,
 				soil: 0, // no additional land use
 				beccs:
-					this.tonsAllocated.beccs < 4 * BILLION
+					this.tonsAllocated.beccs <= 4 * BILLION
 						? 0.003 * this.tonsAllocated.beccs
 						: 0.003 * 4 * BILLION + 0.06 * (this.tonsAllocated.beccs - 4 * BILLION),
 				dac: this.tonsAllocated.dac * Math.pow(2.87904, -4),
@@ -681,6 +638,16 @@ export default {
 				}
 			}
 			return value.toFixed(1).toString();
+		},
+
+		nextPhase() {
+			this.phaseInd++;
+			this.dialog = false;
+		},
+		resetGame() {
+			this.phaseInd = 0;
+			this.dialog = false;
+			// TODO Reset everything else to initial state...
 		},
 	},
 };
