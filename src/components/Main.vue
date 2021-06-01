@@ -99,6 +99,20 @@
 				<ColorBar :frac="tonsSequestered/TEN_BILLION"></ColorBar>
 				<div class="context-text">{{ (tonsSequestered/TEN_BILLION*100).toFixed(0) }}% of the way to 10GT</div>
 
+				<div class="context-text" v-if="phaseInd > 0" >
+					<strong>Your solution has
+					<span class="bright" style="font-size: 1em; margin-top:28px"
+						>{{ permanenceLabel }}</span
+					> permanence</strong>
+					<div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;">
+						<template v-for="perm in permanences" >
+							<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">{{ perm.name }}</div>
+							<ColorBar height="12" :key="perm.name+'bar'" :frac="perm.value/TEN_BILLION"></ColorBar>
+						</template>
+					</div>
+				</div>
+
+
 			</v-col>
 
 
@@ -106,38 +120,14 @@
 				<span class="big">{{ pprint(dim, estimates[dim]).big }}</span>
 				<span class="little">{{ pprint(dim, estimates[dim]).little }}</span>
 				<div class="caps-label">{{ pprintDim(dim) }}</div>
-				<ColorBar></ColorBar>
+				<ColorBar :frac="getContextNum(dim)"></ColorBar>
 				<div class="context-text">{{ getContext(dim) }}</div>
 			</v-col>
 
 
 
-<!-- 			<v-col cols="6" v-if="phaseInd > 0">
-				<div>
-					Your solution has
-					<span class="bright" style="font-size: 1em;"
-						>{{ permanenceLabel }} permanence</span
-					>
-					<div style="display:grid; grid-template-columns: 1fr 1fr 1fr">
-						<div v-for="perm in permanences" :key="'val' + perm.name">
-							<span class="text-h4">{{ pprint("scale", perm.value).big }}</span>
-							<span class="little">{{ pprint("scale", perm.value).little }}</span>
-						</div>
-
-						<div v-for="perm in permanences" :key="'name' + perm.name">
-							{{ perm.name }}
-						</div>
-					</div>
-				</div>
-			</v-col>
- -->
-
 		</v-row>
 		<!-- end top row -->
-
-<!-- 		<section class="mt-10" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr;">
-		</section>
- -->
 
  		<v-row>
  			<v-col cols="6">
@@ -151,10 +141,25 @@
 				>
 					<template v-for="solution in solutions">
 
-						<div  :key="solution+'label'">
-			 				<div class="solution-label">{{ pprintSolution(solution) }}</div>
-							<div class="solution-label">${{costPerTonEstimate(solution)}}/ton</div>
-						</div>
+					    <v-tooltip 
+						    bottom 
+						    :key="solution+'label'" 
+						    max-width="400"
+						    color="black">
+					      <template v-slot:activator="{ on, attrs }">
+					        
+							 <div v-bind="attrs"
+						          v-on="on"
+						          class="tooltip-target">
+				 				<div class="solution-label">{{ pprintSolution(solution) }}</div>
+								<div class="solution-label">${{costPerTonEstimate(solution)}}/ton</div>
+							</div>
+
+					      </template>
+					      <span>{{getTooltip(solution)}}</span>
+					    </v-tooltip>
+
+
 						<v-slider
 							v-model="tonsAllocated[solution]"
 							:key="solution"
@@ -171,20 +176,23 @@
 						</v-slider>
 					</template>
 
-					<div style="grid-column:1/3"> <!--v-if="phaseInd >= 1"-->
-						<p class="bright">How is the captured CO2 used?</p>
+					<div style="grid-column:1/3" v-if="phaseInd >= 1">
+						<p class="bright">What happens to captured CO2	?</p>
 						<v-slider
 							v-model="percentUtilization"
 							:min="0"
 							:max="100"
-							:thumb-size="16"
+							:thumb-size="24"
+							color="yellow"
+							thumb-color="amber"
 							thumb-label="always"
 							persistent-hint
-						></v-slider>
-
-						<div
-							style="position:relative; bottom:12px; color: #777; font-size:0.8em; text-align: center"
 						>
+							
+							<span slot="thumb-label">{{ percentUtilization}}%</span>							
+						</v-slider>
+
+						<div class="context-text" style="position:relative; bottom: 36px">
 							{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}% sequestered
 						</div>
 					</div>
@@ -569,26 +577,31 @@ export default {
 			if (this.estimates[dim] === 0) {
 				return "";
 			}
+			const pct = Number(this.getContextNum(dim)*100).toFixed(0);
+
 			if (dim === "cost") {
-				return `~${Number((100 * this.estimates[dim]) / (21 * Math.pow(10, 12))).toFixed(
-					1
-				)}% of United States GDP in 2020`;
+				return `${pct}% of United States GDP in 2020`;
 			} else if (dim === "repurposedLand") {
-				return `~${Number((100 * this.estimates[dim]) / (328.7 * MILLION)).toFixed(
-					1
-				)}% the land area of India`;
+				return `${pct}% the land area of India`;
 			} else if (dim === "energyUsed" || dim === "energyProduced") {
 				// const energyBreakpoints = {
 				// 	6.61: "California",
 				// 	31.7: "Europe",
 				// 	105.7: "the United States",
 				// };
-				return `~${Number((100 * this.estimates[dim]) / 31.7).toFixed(
-					1
-				)}% the annual energy consumption of Europe`;
+				return `${pct}% the annual energy consumption of Europe`;
 			} else {
 				return "";
 			}
+		},
+		getContextNum(dim){
+			if (dim === "cost") {
+				return this.estimates[dim] / (21 * Math.pow(10, 12));
+			} else if (dim === "repurposedLand") {
+				return this.estimates[dim] / (328.7 * MILLION);
+			} else if (dim === "energyUsed" || dim === "energyProduced") {
+				return this.estimates[dim] / 31.7;
+			} 
 		},
 		maxAllocForSolution(sol) {
 			return {
@@ -599,6 +612,37 @@ export default {
 				blueCarbon: BILLION,
 				enhancedWeathering: 4 * BILLION,
 			}[sol];
+		},
+
+		getTooltip(sol){
+			const tips = {
+				forests: `The oldest carbon removal trick in the book. Planting more trees is fairly
+					cheap, but it takes up a lot of land, uses a lot of water, and when the tree
+					dies (by wildfire, disease, or getting cut down), the carbon stored will be
+					released right back into the atmosphere.`,
+				soil: `Storing carbon in agricultural soils requires the farmers managing the land to
+					adopt challenging regenerative practices like not tilling the soil, planting
+					cover crops, and maintaining a diverse crop rotation. Large-scale behavior
+					change is needed to scale up soil carbon sequestration, and if farmers end these
+					practices, the carbon will be released back into the atmosphere. However, soil
+					with more carbon stored in it is healthier and more and fertile.`,
+				blueCarbon: `Coastal blue carbon ecosystems like mangrove forests, seagrasses, and salt
+					marshes have soils that can store immense amounts of carbon due to anoxic
+					conditions, so protecting and restoring these ecosystems will have outsized
+					positive climate impact.`
+,
+				beccs: `Plant fast-growing trees or crops at scale, but instead of letting them die and
+					decompose (releasing their stored carbon), harvest and combust them to produce
+					bio-energy, capturing the CO2 released on the spot and then sequestering it.
+					Less costly and less energy-intensive than DAC (it actually produces energy),
+					but growing dedicated crops for BECCS requires lots of land and resources.`,
+				dac: `Use chemical engineering wizardry to physically separate the CO2 out of the
+					ambient air. Very energy-intensive and expensive to do, but the CO2 captured can
+					be permanently sequestered.`,
+				enhancedWeathering: `Mining abundant rocks like olivine that are chemically reactive with CO2, and
+					accelerating the rate at which these rocks react with atmospheric CO2.`,
+			};
+			return tips[sol];
 		},
 		// Return the cost per ton (can be dynamic).
 		costPerTonEstimate(sol) {
@@ -748,6 +792,7 @@ export default {
 .big {
 	font-weight: bold;
 	font-size: 3em;
+	margin-right: 4px;
 }
 
 .caps-label {
@@ -775,5 +820,9 @@ export default {
 .context-text{
 	font-size: 12px;
 	margin-top: 8px;
+}
+
+.tooltip-target{
+	cursor: pointer;
 }
 </style>

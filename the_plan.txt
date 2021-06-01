@@ -1,22 +1,4 @@
-add tooltip
-add colorbar
-
-
-
-*FORMAT*
-move news items
-intro scroll
-
-*QA*
 make responsive
-
-
-
-
-
-
-
-
 
 
 
