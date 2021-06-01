@@ -1,12 +1,14 @@
 <template>
-	<v-container>
+	<v-container style="max-width: 1600px">
+
+<v-row>
+		<v-col cols="8">
+
 		<h1 class="display-3 font-weight-bold mb-3">
 			The Road to Ten Gigatons
 		</h1>
 		<h2 class="font-weight-regular display-1 mb-16">Carbon Removal Scale Up Challenge</h2>
 
-<v-row>
-		<v-col cols="8">
 		<p class="subheading font-weight-regular mr-8">
 			According to the IPCC, we'll need to scale up carbon removal to reach 10 billion
 			tons (or gigatons) of CO2 removed from the atmosphere by 2050. Choose carbon
@@ -15,10 +17,10 @@
 			along with other unintended consequences!
 		</p>
 
-		<v-btn class="yellow darken-2 rounded-0 font-weight-black">
+<!-- 		<v-btn class="amber rounded-0 font-weight-black">
 			PLAY
 		</v-btn>
-	</v-col>
+ -->	</v-col>
 
 			<v-col cols="4">
 				<v-img :src="require('../assets/world.png')" style="max-width:300px; opacity: 0.4" contain />
@@ -86,17 +88,31 @@
 		</v-row> -->
 
 		<v-row>
-			<v-col cols="3" style="background-color: #444">
+			<v-col cols="2" class="ma-4">
+<!-- 				<div style="background-color: #444; display:inline-block; padding: 16px">
+ -->
 				<div>
 					<span class="big">{{ pprint("scale", tonsSequestered).big }}</span>
 					<span class="little">{{ pprint("scale", tonsSequestered).little }}</span>
 				</div>
 				<div class="caps-label">SCALE</div>
+				<ColorBar :frac="tonsSequestered/TEN_BILLION"></ColorBar>
+				<div class="context-text">{{ (tonsSequestered/TEN_BILLION*100).toFixed(0) }}% of the way to 10GT</div>
+
 			</v-col>
 
-			<v-col cols="1"></v-col>
 
-			<v-col cols="6" v-if="phaseInd > 0">
+			<v-col cols="2" class="ma-4" v-for="dim in dimensions" :key="dim">
+				<span class="big">{{ pprint(dim, estimates[dim]).big }}</span>
+				<span class="little">{{ pprint(dim, estimates[dim]).little }}</span>
+				<div class="caps-label">{{ pprintDim(dim) }}</div>
+				<ColorBar></ColorBar>
+				<div class="context-text">{{ getContext(dim) }}</div>
+			</v-col>
+
+
+
+<!-- 			<v-col cols="6" v-if="phaseInd > 0">
 				<div>
 					Your solution has
 					<span class="bright" style="font-size: 1em;"
@@ -114,96 +130,105 @@
 					</div>
 				</div>
 			</v-col>
+ -->
+
 		</v-row>
 		<!-- end top row -->
 
-		<section class="mt-10" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr;">
-			<div v-for="dim in dimensions" :key="dim">
-				<span class="big">{{ pprint(dim, estimates[dim]).big }}</span>
-				<span class="little">{{ pprint(dim, estimates[dim]).little }}</span>
-			</div>
-
-			<div class="caps-label" v-for="dim in dimensions" :key="'label' + dim">{{ dim }}</div>
-
-			<div v-for="dim in dimensions" :key="'context' + dim">{{ getContext(dim) }}</div>
+<!-- 		<section class="mt-10" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr;">
 		</section>
+ -->
 
-		<h3 class="mt-10" style="display:inline-block">Solutions</h3>
-		<p class="bright" style="display:inline-block; margin-left: 16px;">
-			Move the sliders until you achieve 10 Gigaton scale.
-		</p>
+ 		<v-row>
+ 			<v-col cols="6">
+				<h3 class="mt-10" style="display:inline-block">Solutions</h3>
+				<p class="bright" style="display:inline-block; margin-left: 16px;">
+					Move the sliders until you achieve 10 Gigaton scale.
+				</p>
 
-		<section
-			style="display:grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10%; grid-row-gap: 24px;"
-		>
-			<v-slider
-				v-model="tonsAllocated[solution]"
-				v-for="solution in solutions"
-				:key="solution"
-				:hint="'$' + costPerTonEstimate(solution) + '/ton'"
-				:max="maxAllocForSolution(solution)"
-				:min="minAlloc"
-				:thumb-size="16"
-				thumb-label="always"
-				style="min-width: 200px"
-				persistent-hint
-			>
-				<span slot="label" class="solution-label">{{ pprintSolution(solution) }}</span>
-
-				<span slot="thumb-label">{{ pprint("scale", tonsAllocated[solution]).big }}T</span>
-			</v-slider>
-		</section>
-
-		<v-row class="mt-10" v-if="phaseInd >= 1">
-			<v-col>
-				<p class="bright">How is the captured CO2 used?</p>
-				<v-slider
-					v-model="percentUtilization"
-					:min="0"
-					:max="100"
-					:thumb-size="16"
-					thumb-label="always"
-					persistent-hint
-				></v-slider>
-
-				<div
-					style="position:relative; bottom:12px; color: #777; font-size:0.8em; text-align: center"
+				<section
+					style="display:grid; grid-template-columns: 1fr 3fr 1fr 3fr; grid-column-gap: 5%; grid-row-gap: 24px;"
 				>
-					{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}% sequestered
-				</div>
-			</v-col>
+					<template v-for="solution in solutions">
+
+						<div  :key="solution+'label'">
+			 				<div class="solution-label">{{ pprintSolution(solution) }}</div>
+							<div class="solution-label">${{costPerTonEstimate(solution)}}/ton</div>
+						</div>
+						<v-slider
+							v-model="tonsAllocated[solution]"
+							:key="solution"
+							:max="maxAllocForSolution(solution)"
+							:min="minAlloc"
+							:thumb-size="24"
+							color="yellow"
+							thumb-color="amber"
+							thumb-label="always"
+							style="min-width: 200px"
+							persistent-hint
+						>
+							<span slot="thumb-label">{{ pprint("scale", tonsAllocated[solution]).big }}T</span>
+						</v-slider>
+					</template>
+
+					<div style="grid-column:1/3"> <!--v-if="phaseInd >= 1"-->
+						<p class="bright">How is the captured CO2 used?</p>
+						<v-slider
+							v-model="percentUtilization"
+							:min="0"
+							:max="100"
+							:thumb-size="16"
+							thumb-label="always"
+							persistent-hint
+						></v-slider>
+
+						<div
+							style="position:relative; bottom:12px; color: #777; font-size:0.8em; text-align: center"
+						>
+							{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}% sequestered
+						</div>
+					</div>
+
+				</section> 				
+ 			</v-col>
+
+ 			<v-col cols="6">
+ 				
+				<h3 class="mt-5" v-if="newsItems.length > 0">News simulation</h3>
+				<div class="news-header" v-if="dealbreakers.length > 0">Bad news (you must resolve these to win)</div>
+				<ul>
+				<li
+					class="news"
+					v-for="newsItem in dealbreakers"
+					:key="newsItem.text"
+				>
+					{{ newsItem.text }}
+				</li>
+			</ul>
+
+				<div class="news-header" v-if="warnings.length > 0">Warning!</div>
+				<ul>
+				<li
+					class="news"
+					v-for="newsItem in warnings"
+					:key="newsItem.text"
+				>
+					{{ newsItem.text }}
+				</li></ul>
+
+				<div class="news-header" v-if="goodNews.length > 0">Good news</div>
+				<ul><li
+					class="news"
+					v-for="newsItem in goodNews"
+					:key="newsItem.text"
+				>
+					{{ newsItem.text }}
+				</li></ul> 				
+ 			</v-col>
 		</v-row>
 
-		<h3 class="mt-5" v-if="newsItems.length > 0">With your current setup</h3>
-		<div v-if="dealbreakers.length > 0">Dealbreakers (you must resolve these to win):</div>
-		<div
-			class="news"
-			v-for="newsItem in dealbreakers"
-			:key="newsItem.text"
-			:style="{ color: 'red' }"
-		>
-			{{ newsItem.text }}
-		</div>
 
-		<div v-if="warnings.length > 0">Warnings:</div>
-		<div
-			class="news"
-			v-for="newsItem in warnings"
-			:key="newsItem.text"
-			:style="{ color: 'yellow' }"
-		>
-			{{ newsItem.text }}
-		</div>
 
-		<div v-if="goodNews.length > 0">Good news:</div>
-		<div
-			class="news"
-			v-for="newsItem in goodNews"
-			:key="newsItem.text"
-			:style="{ color: 'green' }"
-		>
-			{{ newsItem.text }}
-		</div>
 
 
 		<v-dialog v-model="dialog" width="500">
@@ -240,6 +265,7 @@
 
 <script>
 import _ from "lodash";
+import ColorBar from '@/components/ColorBar.vue';
 
 const MILLION = 1000000;
 const BILLION = 1000000000;
@@ -248,6 +274,9 @@ const TEN_BILLION = 10000000000;
 export default {
 	name: "Main",
 
+	components: {
+		ColorBar,
+	},
 	computed: {
 		tonsSequestered() {
 			return _.sum(_.values(this.tonsAllocated));
@@ -515,6 +544,8 @@ export default {
 			minAlloc: 0,
 			maxAlloc: TEN_BILLION,
 
+			TEN_BILLION: TEN_BILLION,
+
 			percentUtilization: 50,
 
 			// The end game dialog.
@@ -523,6 +554,15 @@ export default {
 	},
 
 	methods: {
+		pprintDim(dim){
+			const mapping = {
+				'repurposedLand': 'Land*',
+				'energyUsed': 'Energy used',
+				'energyProduced': 'Energy produced'
+			};
+			return mapping[dim] || dim;
+		},
+
 		getContext(dim) {
 			// TODO(John): Return string with context for string dim ('cost', 'energy', 'land')
 			// You can look up the values using this.estimates[dim]
@@ -668,17 +708,20 @@ export default {
 		// Helper function for formatting big numbers.
 		formatNumber(value) {
 			var limits = [
+				{ limit: 1e12, suffix: "T" },			
 				{ limit: 1e9, suffix: "B" },
 				{ limit: 1e6, suffix: "M" },
 				{ limit: 1e3, suffix: "k" },
 			];
 
+			const precision = value > BILLION ? 1 : 0;
+
 			for (const lim of limits) {
 				if (value >= lim.limit) {
-					return (value / lim.limit).toFixed(1) + lim.suffix;
+					return (value / lim.limit).toFixed(precision) + lim.suffix;
 				}
 			}
-			return value.toFixed(1).toString();
+			return value.toFixed(precision).toString();
 		},
 
 		nextPhase() {
@@ -709,7 +752,7 @@ export default {
 
 .caps-label {
 	font-weight: bold;
-	opacity: 0.5;
+	opacity: 0.8;
 	text-transform: uppercase;
 }
 
@@ -724,7 +767,13 @@ export default {
 	font-size: 12px;
 }
 
-.news {
+.news-header{
+	font-weight: bold;
+	margin-top: 8px;
+}
+
+.context-text{
+	font-size: 12px;
 	margin-top: 8px;
 }
 </style>
