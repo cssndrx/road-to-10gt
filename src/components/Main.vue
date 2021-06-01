@@ -2,7 +2,7 @@
 	<v-container style="max-width: 1600px">
 
 <v-row>
-		<v-col cols="8">
+		<v-col :md="8">
 
 		<h1 class="display-3 font-weight-bold mb-3">
 			The Road to Ten Gigatons
@@ -22,13 +22,13 @@
 		</v-btn>
  -->	</v-col>
 
-			<v-col cols="4">
+			<v-col :md="4">
 				<v-img :src="require('../assets/world.png')" style="max-width:300px; opacity: 0.4" contain />
 			</v-col>
 </v-row>
 
-		<v-row>
-			<v-col cols="2" class="ma-4">
+		<v-row class="justify-start">
+			<v-col cols="4" :lg="2" class="ma-lg-4">
 <!-- 				<div style="background-color: #444; display:inline-block; padding: 16px">
  -->
 				<div>
@@ -56,7 +56,7 @@
 			</v-col>
 
 
-			<v-col cols="2" class="ma-4" v-for="dim in dimensions" :key="dim">
+			<v-col cols="4" :lg="2"  class="ma-lg-4" v-for="dim in dimensions" :key="dim">
 				<span class="big">{{ pprint(dim, estimates[dim]).big }}</span>
 				<span class="little">{{ pprint(dim, estimates[dim]).little }}</span>
 				<div class="caps-label">{{ pprintDim(dim) }}</div>
@@ -70,21 +70,20 @@
 		<!-- end top row -->
 
  		<v-row>
- 			<v-col cols="6">
-				<h3 class="mt-10" style="display:inline-block">Solutions</h3>
-				<p class="bright" style="display:inline-block; margin-left: 16px;">
+ 			<v-col cols="12" :lg="6">
+				<h3 class="mt-10">Solutions</h3>
+				<p class="bright mb-10">
 					Move the sliders until you achieve 10 Gigaton scale.
 				</p>
 
-				<section
-					style="display:grid; grid-template-columns: 1fr 3fr 1fr 3fr; grid-column-gap: 5%; grid-row-gap: 24px;"
+				<section class="solutions-grid"
 				>
 					<template v-for="solution in solutions">
 
 					    <v-tooltip 
 						    bottom 
 						    :key="solution+'label'" 
-						    max-width="400"
+						    max-width="300"
 						    color="black">
 					      <template v-slot:activator="{ on, attrs }">
 					        
@@ -140,7 +139,7 @@
 				</section> 				
  			</v-col>
 
- 			<v-col cols="6">
+ 			<v-col cols="12" :lg="6">
  				
 				<h3 class="mt-5" v-if="newsItems.length > 0">News simulation</h3>
 				<div class="news-header" v-if="dealbreakers.length > 0">Bad news (you must resolve these to win)</div>
@@ -760,5 +759,20 @@ export default {
 
 .tooltip-target{
 	cursor: pointer;
+}
+
+.solutions-grid{
+	display:grid; grid-template-columns: 1fr 3fr 1fr 3fr; grid-column-gap: 5%; grid-row-gap: 24px;
+}
+
+@media (max-width: 699px){
+	.solutions-grid{
+		grid-template-columns: 1fr 3fr;
+	}
+
+	.big {
+		font-size: 1.5em;
+	}
+
 }
 </style>
