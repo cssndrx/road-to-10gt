@@ -5,8 +5,88 @@
 		</h1>
 		<h2 class="font-weight-regular display-1 mb-16">Carbon Removal Scale Up Challenge</h2>
 
+<v-row>
+		<v-col cols="8">
+		<p class="subheading font-weight-regular mr-8">
+			According to the IPCC, we'll need to scale up carbon removal to reach 10 billion
+			tons (or gigatons) of CO2 removed from the atmosphere by 2050. Choose carbon
+			removal approaches to scale up by moving the sliders above until you reach 10
+			gigatons, but watch out for the land and energy you're using in the process,
+			along with other unintended consequences!
+		</p>
+
+		<v-btn class="yellow darken-2 rounded-0 font-weight-black">
+			PLAY
+		</v-btn>
+	</v-col>
+
+			<v-col cols="4">
+				<v-img :src="require('../assets/world.png')" style="max-width:300px; opacity: 0.4" contain />
+			</v-col>
+</v-row>
+
+
+<!-- 		<v-row>
+
+			<v-col class="mb-4 col-md-8">
+				<h3>Forests</h3>
+
+				<p>
+					The oldest carbon removal trick in the book. Planting more trees is fairly
+					cheap, but it takes up a lot of land, uses a lot of water, and when the tree
+					dies (by wildfire, disease, or getting cut down), the carbon stored will be
+					released right back into the atmosphere.
+				</p>
+
+				<h3>Soil</h3>
+
+				<p>
+					Storing carbon in agricultural soils requires the farmers managing the land to
+					adopt challenging regenerative practices like not tilling the soil, planting
+					cover crops, and maintaining a diverse crop rotation. Large-scale behavior
+					change is needed to scale up soil carbon sequestration, and if farmers end these
+					practices, the carbon will be released back into the atmosphere. However, soil
+					with more carbon stored in it is healthier and more and fertile.
+				</p>
+
+				<h3>Blue Carbon</h3>
+
+				<p>
+					Coastal blue carbon ecosystems like mangrove forests, seagrasses, and salt
+					marshes have soils that can store immense amounts of carbon due to anoxic
+					conditions, so protecting and restoring these ecosystems will have outsized
+					positive climate impact.
+				</p>
+
+				<h3>DAC (Direct Air Capture)</h3>
+
+				<p>
+					Use chemical engineering wizardry to physically separate the CO2 out of the
+					ambient air. Very energy-intensive and expensive to do, but the CO2 captured can
+					be permanently sequestered.
+				</p>
+
+				<h3>BECCS (Bio-energy with Carbon Capture and Storage)</h3>
+
+				<p>
+					Plant fast-growing trees or crops at scale, but instead of letting them die and
+					decompose (releasing their stored carbon), harvest and combust them to produce
+					bio-energy, capturing the CO2 released on the spot and then sequestering it.
+					Less costly and less energy-intensive than DAC (it actually produces energy),
+					but growing dedicated crops for BECCS requires lots of land and resources.
+				</p>
+
+				<h3>Enhanced Weathering</h3>
+
+				<p>
+					Mining abundant rocks like olivine that are chemically reactive with CO2, and
+					accelerating the rate at which these rocks react with atmospheric CO2.
+				</p>
+			</v-col>
+		</v-row> -->
+
 		<v-row>
-			<v-col cols="3" style="background-color: #777">
+			<v-col cols="3" style="background-color: #444">
 				<div>
 					<span class="big">{{ pprint("scale", tonsSequestered).big }}</span>
 					<span class="little">{{ pprint("scale", tonsSequestered).little }}</span>
@@ -125,83 +205,6 @@
 			{{ newsItem.text }}
 		</div>
 
-		<v-row>
-			<v-col cols="12">
-				<v-img :src="require('../assets/world.png')" class="my-3" contain />
-			</v-col>
-
-			<v-col class="mb-4 col-md-8">
-				<h1 class="display-3 font-weight-bold my-3">
-					The Road to Ten Gigatons
-				</h1>
-
-				<p class="subheading font-weight-regular">
-					According to the IPCC, we'll need to scale up carbon removal to reach 10 billion
-					tons (or gigatons) of CO2 removed from the atmosphere by 2050. Choose carbon
-					removal approaches to scale up by moving the sliders above until you reach 10
-					gigatons, but watch out for the land and energy you're using in the process,
-					along with other unintended consequences!
-				</p>
-
-				<v-btn class="ma-2 yellow darken-1 font-weight-black">
-					PLAY
-				</v-btn>
-
-				<h3>Forests</h3>
-
-				<p>
-					The oldest carbon removal trick in the book. Planting more trees is fairly
-					cheap, but it takes up a lot of land, uses a lot of water, and when the tree
-					dies (by wildfire, disease, or getting cut down), the carbon stored will be
-					released right back into the atmosphere.
-				</p>
-
-				<h3>Soil</h3>
-
-				<p>
-					Storing carbon in agricultural soils requires the farmers managing the land to
-					adopt challenging regenerative practices like not tilling the soil, planting
-					cover crops, and maintaining a diverse crop rotation. Large-scale behavior
-					change is needed to scale up soil carbon sequestration, and if farmers end these
-					practices, the carbon will be released back into the atmosphere. However, soil
-					with more carbon stored in it is healthier and more and fertile.
-				</p>
-
-				<h3>Blue Carbon</h3>
-
-				<p>
-					Coastal blue carbon ecosystems like mangrove forests, seagrasses, and salt
-					marshes have soils that can store immense amounts of carbon due to anoxic
-					conditions, so protecting and restoring these ecosystems will have outsized
-					positive climate impact.
-				</p>
-
-				<h3>DAC (Direct Air Capture)</h3>
-
-				<p>
-					Use chemical engineering wizardry to physically separate the CO2 out of the
-					ambient air. Very energy-intensive and expensive to do, but the CO2 captured can
-					be permanently sequestered.
-				</p>
-
-				<h3>BECCS (Bio-energy with Carbon Capture and Storage)</h3>
-
-				<p>
-					Plant fast-growing trees or crops at scale, but instead of letting them die and
-					decompose (releasing their stored carbon), harvest and combust them to produce
-					bio-energy, capturing the CO2 released on the spot and then sequestering it.
-					Less costly and less energy-intensive than DAC (it actually produces energy),
-					but growing dedicated crops for BECCS requires lots of land and resources.
-				</p>
-
-				<h3>Enhanced Weathering</h3>
-
-				<p>
-					Mining abundant rocks like olivine that are chemically reactive with CO2, and
-					accelerating the rate at which these rocks react with atmospheric CO2.
-				</p>
-			</v-col>
-		</v-row>
 
 		<v-dialog v-model="dialog" width="500">
 			<v-card>

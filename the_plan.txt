@@ -1,3 +1,41 @@
+*FORMAT*
+move news items
+intro scroll
+
+*QA*
+make responsive
+
+
+
+
+
+
+
+
+
+
+
+
+======
+
+*STYLE*
+massive undertaking
+weighty
+significant
+difficult
+
+humans
+consequences
+tradeoffs
+
+
+*COOLNESS*
+see stuff growing visibly
+
+
+======
+
+
 UI:
 Change land to Land Converted to CDR
 
