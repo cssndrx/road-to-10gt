@@ -27,66 +27,6 @@
 			</v-col>
 </v-row>
 
-
-<!-- 		<v-row>
-
-			<v-col class="mb-4 col-md-8">
-				<h3>Forests</h3>
-
-				<p>
-					The oldest carbon removal trick in the book. Planting more trees is fairly
-					cheap, but it takes up a lot of land, uses a lot of water, and when the tree
-					dies (by wildfire, disease, or getting cut down), the carbon stored will be
-					released right back into the atmosphere.
-				</p>
-
-				<h3>Soil</h3>
-
-				<p>
-					Storing carbon in agricultural soils requires the farmers managing the land to
-					adopt challenging regenerative practices like not tilling the soil, planting
-					cover crops, and maintaining a diverse crop rotation. Large-scale behavior
-					change is needed to scale up soil carbon sequestration, and if farmers end these
-					practices, the carbon will be released back into the atmosphere. However, soil
-					with more carbon stored in it is healthier and more and fertile.
-				</p>
-
-				<h3>Blue Carbon</h3>
-
-				<p>
-					Coastal blue carbon ecosystems like mangrove forests, seagrasses, and salt
-					marshes have soils that can store immense amounts of carbon due to anoxic
-					conditions, so protecting and restoring these ecosystems will have outsized
-					positive climate impact.
-				</p>
-
-				<h3>DAC (Direct Air Capture)</h3>
-
-				<p>
-					Use chemical engineering wizardry to physically separate the CO2 out of the
-					ambient air. Very energy-intensive and expensive to do, but the CO2 captured can
-					be permanently sequestered.
-				</p>
-
-				<h3>BECCS (Bio-energy with Carbon Capture and Storage)</h3>
-
-				<p>
-					Plant fast-growing trees or crops at scale, but instead of letting them die and
-					decompose (releasing their stored carbon), harvest and combust them to produce
-					bio-energy, capturing the CO2 released on the spot and then sequestering it.
-					Less costly and less energy-intensive than DAC (it actually produces energy),
-					but growing dedicated crops for BECCS requires lots of land and resources.
-				</p>
-
-				<h3>Enhanced Weathering</h3>
-
-				<p>
-					Mining abundant rocks like olivine that are chemically reactive with CO2, and
-					accelerating the rate at which these rocks react with atmospheric CO2.
-				</p>
-			</v-col>
-		</v-row> -->
-
 		<v-row>
 			<v-col cols="2" class="ma-4">
 <!-- 				<div style="background-color: #444; display:inline-block; padding: 16px">
@@ -235,10 +175,6 @@
  			</v-col>
 		</v-row>
 
-
-
-
-
 		<v-dialog v-model="dialog" width="500">
 			<v-card>
 				<v-card-title class="headline">
@@ -260,7 +196,7 @@
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn color="primary" text @click="nextPhase()" v-if="!isLastPhase">
-						Proceed to {{ phaseNames[phaseInd + 1] }} phase;
+						Proceed to {{ phaseNames[phaseInd + 1] }} phase
 					</v-btn>
 					<v-btn color="primary" text @click="resetGame()" v-else>
 						Play again
