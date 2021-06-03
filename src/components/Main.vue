@@ -47,7 +47,7 @@
 					<div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;">
 						<template v-for="perm in permanences" >
 							<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">{{ perm.name }}</div>
-							<ColorBar height="12" :key="perm.name+'bar'" :frac="perm.value/TEN_BILLION"></ColorBar>
+							<ColorBar :height="12" :key="perm.name+'bar'" :frac="perm.value/TEN_BILLION"></ColorBar>
 						</template>
 					</div>
 				</div>
@@ -71,7 +71,7 @@
 
  		<v-row>
  			<v-col cols="12" :lg="6">
-				<h3 class="mt-10">Solutions</h3>
+				<h3>Solutions</h3>
 				<p class="bright mb-10">
 					Move the sliders until you achieve 10 Gigaton scale.
 				</p>
@@ -141,8 +141,12 @@
 
  			<v-col cols="12" :lg="6">
  				
-				<h3 class="mt-5" v-if="newsItems.length > 0">News simulation</h3>
-				<div class="news-header" v-if="dealbreakers.length > 0">Bad news (you must resolve these to win)</div>
+				<h3>News simulation</h3>
+				<p class="bright">
+					Decarbonize without generating any dealbreakers.
+				</p>
+
+				<div class="news-header red" v-if="dealbreakers.length > 0">Dealbreakers (you must resolve these to win)</div>
 				<ul>
 				<li
 					class="news"
@@ -213,6 +217,17 @@ import ColorBar from '@/components/ColorBar.vue';
 const MILLION = 1000000;
 const BILLION = 1000000000;
 const TEN_BILLION = 10000000000;
+
+function getInitialState(){
+	return {
+				forests: 0,
+				dac: 0,
+				beccs: 0,
+				soil: 0,
+				blueCarbon: 0,
+				enhancedWeathering: 0,
+			};
+}
 
 export default {
 	name: "Main",
@@ -319,6 +334,9 @@ export default {
 				return [
 					`Right now your solution costs $${this.estimates["cost"]}, converts ${this.estimates["repurposedLand"]} hectares of land to carbon removal, and uses ${this.estimates["energyUsed"]} exajoules of energy. Think you can do better? Give it another try!`,
 				];
+
+				// DOesn't work for some reason.
+				// return [`Right now your solution costs ${ this.pprint('cost', this.estimates['cost']).big } USD, converts ${ this.pprint('land', this.estimates['land']).big } hectares of land to carbon removal, and uses ${ this.pprint('energy', this.estimates['energy']).big } exajoules of energy. Think you can do better?`];
 			}
 			return [];
 		},
@@ -475,14 +493,15 @@ export default {
 
 			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
-			tonsAllocated: {
-				forests: 0,
-				dac: 0,
-				beccs: 0,
-				soil: 0,
-				blueCarbon: 0,
-				enhancedWeathering: 0,
-			},
+			// tonsAllocated: {
+			// 	forests: 0,
+			// 	dac: 0,
+			// 	beccs: 0,
+			// 	soil: 0,
+			// 	blueCarbon: 0,
+			// 	enhancedWeathering: 0,
+			// },
+			tonsAllocated: getInitialState(),
 
 			minAlloc: 0,
 			maxAlloc: TEN_BILLION,
@@ -710,7 +729,7 @@ export default {
 		resetGame() {
 			this.phaseInd = 0;
 			this.dialog = false;
-			// TODO Reset everything else to initial state...
+			this.tonsAllocated = getInitialState();
 		},
 	},
 };

@@ -1,3 +1,7 @@
+bug:
+there's a bug where if you have a good solution in the first round, you don't win the second round...
+tweak the congrats messages
+
 
 add in shoutout to bill gates book + other resources
 dialog should trigger whenever you cross 10GT
