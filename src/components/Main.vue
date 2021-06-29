@@ -1,103 +1,109 @@
 <template>
 	<v-container style="max-width: 1600px">
+		<v-row>
+			<v-col :md="8">
+				<h1 class="display-3 font-weight-bold mb-3">
+					The Road to Ten Gigatons
+				</h1>
+				<h2 class="font-weight-regular display-1 mb-16">
+					Carbon Removal Scale Up Challenge
+				</h2>
 
-<v-row>
-		<v-col :md="8">
+				<p class="subheading font-weight-regular mr-8">
+					According to the IPCC (Intergovernmental Panel on Climate Change), we'll need to
+					remove 10 billion tons (or gigatons) of CO2 from the atmosphere by 2050. Choose
+					carbon removal approaches to scale up by moving the sliders below until you
+					reach 10 gigatons, but watch out for the land and energy you're using in the
+					process, along with other unintended consequences!
+				</p>
 
-		<h1 class="display-3 font-weight-bold mb-3">
-			The Road to Ten Gigatons
-		</h1>
-		<h2 class="font-weight-regular display-1 mb-16">Carbon Removal Scale Up Challenge</h2>
-
-		<p class="subheading font-weight-regular mr-8">
-			According to the IPCC, we'll need to scale up carbon removal to reach 10 billion
-			tons (or gigatons) of CO2 removed from the atmosphere by 2050. Choose carbon
-			removal approaches to scale up by moving the sliders above until you reach 10
-			gigatons, but watch out for the land and energy you're using in the process,
-			along with other unintended consequences!
-		</p>
-
-<!-- 		<v-btn class="amber rounded-0 font-weight-black">
+				<!-- 		<v-btn class="amber rounded-0 font-weight-black">
 			PLAY
 		</v-btn>
- -->	</v-col>
+ -->
+			</v-col>
 
 			<v-col :md="4">
-				<v-img :src="require('../assets/world.png')" style="max-width:300px; opacity: 0.4" contain />
+				<v-img
+					:src="require('../assets/world.png')"
+					style="max-width:300px; opacity: 0.4"
+					contain
+				/>
 			</v-col>
-</v-row>
+		</v-row>
 
 		<v-row class="justify-start">
 			<v-col cols="4" :lg="2" class="ma-lg-4">
-<!-- 				<div style="background-color: #444; display:inline-block; padding: 16px">
+				<!-- 				<div style="background-color: #444; display:inline-block; padding: 16px">
  -->
 				<div>
 					<span class="big">{{ pprint("scale", tonsSequestered).big }}</span>
 					<span class="little">{{ pprint("scale", tonsSequestered).little }}</span>
 				</div>
 				<div class="caps-label">SCALE</div>
-				<ColorBar :frac="tonsSequestered/TEN_BILLION"></ColorBar>
-				<div class="context-text">{{ (tonsSequestered/TEN_BILLION*100).toFixed(0) }}% of the way to 10GT</div>
+				<!-- <ColorBar :frac="tonsSequestered / TEN_BILLION"></ColorBar> -->
+				<ColorsBar :fracs="tonsAllocatedFracs" :colors="colorForSolution"></ColorsBar>
+				<div class="context-text">
+					{{ ((tonsSequestered / TEN_BILLION) * 100).toFixed(0) }}% of the way to 10GT
+				</div>
 
-				<div class="context-text" v-if="phaseInd > 0" >
-					<strong>Your solution has
-					<span class="bright" style="font-size: 1em; margin-top:28px"
-						>{{ permanenceLabel }}</span
-					> permanence</strong>
+				<div class="context-text" v-if="phaseInd > 0">
+					<strong
+						>Your solution has
+						<span class="bright" style="font-size: 1em; margin-top:28px">{{
+							permanenceLabel
+						}}</span>
+						permanence</strong
+					>
 					<div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;">
-						<template v-for="perm in permanences" >
-							<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">{{ perm.name }}</div>
-							<ColorBar :height="12" :key="perm.name+'bar'" :frac="perm.value/TEN_BILLION"></ColorBar>
+						<template v-for="perm in permanences">
+							<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">
+								{{ perm.name }}
+							</div>
+							<ColorBar
+								:height="12"
+								:key="perm.name + 'bar'"
+								:frac="perm.value / TEN_BILLION"
+							></ColorBar>
 						</template>
 					</div>
 				</div>
-
-
 			</v-col>
 
-
-			<v-col cols="4" :lg="2"  class="ma-lg-4" v-for="dim in dimensions" :key="dim">
+			<v-col cols="4" :lg="2" class="ma-lg-4" v-for="dim in dimensions" :key="dim">
 				<span class="big">{{ pprint(dim, estimates[dim]).big }}</span>
 				<span class="little">{{ pprint(dim, estimates[dim]).little }}</span>
 				<div class="caps-label">{{ pprintDim(dim) }}</div>
-				<ColorBar :frac="getContextNum(dim)"></ColorBar>
+				<!-- <ColorBar :frac="getContextNum(dim)"></ColorBar> -->
+				<ColorsBar :fracs="getFracsForDim(dim)" :colors="colorForSolution"></ColorsBar>
 				<div class="context-text">{{ getContext(dim) }}</div>
 			</v-col>
-
-
-
 		</v-row>
 		<!-- end top row -->
 
- 		<v-row>
- 			<v-col cols="12" :lg="6">
+		<v-row>
+			<v-col cols="12" :lg="6">
 				<h3>Solutions</h3>
 				<p class="bright mb-10">
 					Move the sliders until you achieve 10 Gigaton scale.
 				</p>
 
-				<section class="solutions-grid"
-				>
+				<section class="solutions-grid">
 					<template v-for="solution in solutions">
+						<v-tooltip bottom :key="solution + 'label'" max-width="300" color="black">
+							<template v-slot:activator="{ on, attrs }">
+								<div v-bind="attrs" v-on="on" class="tooltip-target">
+									<div class="solution-label">
+										{{ pprintSolution(solution) }}
+									</div>
 
-					    <v-tooltip 
-						    bottom 
-						    :key="solution+'label'" 
-						    max-width="300"
-						    color="black">
-					      <template v-slot:activator="{ on, attrs }">
-					        
-							 <div v-bind="attrs"
-						          v-on="on"
-						          class="tooltip-target">
-				 				<div class="solution-label">{{ pprintSolution(solution) }}</div>
-								<div class="solution-label">${{costPerTonEstimate(solution)}}/ton</div>
-							</div>
-
-					      </template>
-					      <span>{{getTooltip(solution)}}</span>
-					    </v-tooltip>
-
+									<div class="solution-label">
+										${{ costPerTonEstimate(solution) }}/ton
+									</div>
+								</div>
+							</template>
+							<span>{{ getTooltip(solution) }}</span>
+						</v-tooltip>
 
 						<v-slider
 							v-model="tonsAllocated[solution]"
@@ -105,18 +111,20 @@
 							:max="maxAllocForSolution(solution)"
 							:min="minAlloc"
 							:thumb-size="24"
-							color="yellow"
-							thumb-color="amber"
+							:color="colorForSolution[solution]"
+							:thumb-color="colorForSolution[solution]"
 							thumb-label="always"
 							style="min-width: 200px"
 							persistent-hint
 						>
-							<span slot="thumb-label">{{ pprint("scale", tonsAllocated[solution]).big }}T</span>
+							<span slot="thumb-label"
+								>{{ pprint("scale", tonsAllocated[solution]).big }}T</span
+							>
 						</v-slider>
 					</template>
 
 					<div style="grid-column:1/3" v-if="phaseInd >= 1">
-						<p class="bright">What happens to captured CO2	?</p>
+						<p class="bright">What happens to captured CO2 ?</p>
 						<v-slider
 							v-model="percentUtilization"
 							:min="0"
@@ -127,55 +135,46 @@
 							thumb-label="always"
 							persistent-hint
 						>
-							
-							<span slot="thumb-label">{{ percentUtilization}}%</span>							
+							<span slot="thumb-label">{{ percentUtilization }}%</span>
 						</v-slider>
 
 						<div class="context-text" style="position:relative; bottom: 36px">
-							{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}% sequestered
+							{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}%
+							sequestered
 						</div>
 					</div>
+				</section>
+			</v-col>
 
-				</section> 				
- 			</v-col>
-
- 			<v-col cols="12" :lg="6">
- 				
+			<v-col cols="12" :lg="6">
 				<h3>News simulation</h3>
 				<p class="bright">
 					Decarbonize without generating any dealbreakers.
 				</p>
 
-				<div class="news-header red" v-if="dealbreakers.length > 0">Dealbreakers (you must resolve these to win)</div>
+				<div class="news-header red" v-if="dealbreakers.length > 0">
+					Dealbreakers (you must resolve these to win)
+				</div>
 				<ul>
-				<li
-					class="news"
-					v-for="newsItem in dealbreakers"
-					:key="newsItem.text"
-				>
-					{{ newsItem.text }}
-				</li>
-			</ul>
+					<li class="news" v-for="newsItem in dealbreakers" :key="newsItem.text">
+						{{ newsItem.text }}
+					</li>
+				</ul>
 
 				<div class="news-header" v-if="warnings.length > 0">Warning!</div>
 				<ul>
-				<li
-					class="news"
-					v-for="newsItem in warnings"
-					:key="newsItem.text"
-				>
-					{{ newsItem.text }}
-				</li></ul>
+					<li class="news" v-for="newsItem in warnings" :key="newsItem.text">
+						{{ newsItem.text }}
+					</li>
+				</ul>
 
 				<div class="news-header" v-if="goodNews.length > 0">Good news</div>
-				<ul><li
-					class="news"
-					v-for="newsItem in goodNews"
-					:key="newsItem.text"
-				>
-					{{ newsItem.text }}
-				</li></ul> 				
- 			</v-col>
+				<ul>
+					<li class="news" v-for="newsItem in goodNews" :key="newsItem.text">
+						{{ newsItem.text }}
+					</li>
+				</ul>
+			</v-col>
 		</v-row>
 
 		<v-dialog v-model="dialog" width="500">
@@ -212,21 +211,22 @@
 
 <script>
 import _ from "lodash";
-import ColorBar from '@/components/ColorBar.vue';
+import ColorBar from "@/components/ColorBar.vue";
+import ColorsBar from "@/components/ColorsBar.vue";
 
 const MILLION = 1000000;
 const BILLION = 1000000000;
 const TEN_BILLION = 10000000000;
 
-function getInitialState(){
+function getInitialState() {
 	return {
-				forests: 0,
-				dac: 0,
-				beccs: 0,
-				soil: 0,
-				blueCarbon: 0,
-				enhancedWeathering: 0,
-			};
+		forests: 0,
+		dac: 0,
+		beccs: 0,
+		soil: 0,
+		blueCarbon: 0,
+		enhancedWeathering: 0,
+	};
 }
 
 export default {
@@ -234,8 +234,16 @@ export default {
 
 	components: {
 		ColorBar,
+		ColorsBar,
 	},
 	computed: {
+		tonsAllocatedFracs() {
+			const fracs = {};
+			for (const [key, value] of Object.entries(this.tonsAllocated)) {
+				fracs[key] = value / TEN_BILLION;
+			}
+			return fracs;
+		},
 		tonsSequestered() {
 			return _.sum(_.values(this.tonsAllocated));
 		},
@@ -328,7 +336,7 @@ export default {
 					`Only ${parseInt(
 						(100 * this.permanences[2].value) / this.tonsSequestered
 					)}% of the CO2 you removed has been stored long-term, and the rest will be re-emitted back into the atmosphere. In this next phase, modify your solution to be “high permanence”. You can monitor the permanence of your solution at top of the screen.`,
-					`Right now, half of the CO2 captured via DAC and BECCS is being stored permanently, but the other half is being used to make products that will be profitable and bring money into the industry, but will also release that CO2 back into the atmosphere on a short timeframe. You get modify the amount of CO2 being sequestered vs utilized with a new slider at the bottom of the screen.`,
+					`Right now, half of the CO2 captured via DAC and BECCS is being stored permanently, but the other half is being used to make products that will be profitable and bring money into the industry, but will also release that CO2 back into the atmosphere on a short timeframe. You can modify the amount of CO2 being sequestered vs utilized with a new slider at the bottom of the screen.`,
 				];
 			} else if (this.phaseInd === 1) {
 				return [
@@ -455,9 +463,15 @@ export default {
 					color: "green",
 				},
 				{
+					condition: this.tonsAllocated.dac > 1 * BILLION,
+					text:
+						"After lots of R&D work you've developed new advanced sorbent materials for capturing carbon and have mobilized global supply chains to produce modular DAC units. Costs of direct air capture are slowly beginning to come down.",
+					color: "green",
+				},
+				{
 					condition: this.estimates.energyUsed > 53,
 					text:
-						"Energy used for direct air capture makes up more than half of total US energy consumption in 2020!",
+						"Energy used for carbon removal makes up more than half of total US energy consumption in 2020!",
 					color: "red",
 				},
 			];
@@ -493,6 +507,14 @@ export default {
 
 			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
+			colorForSolution: {
+				forests: "green",
+				dac: "#ffc107",
+				beccs: "orange",
+				soil: "brown",
+				blueCarbon: "#ADD8E6",
+				enhancedWeathering: "red",
+			},
 			// tonsAllocated: {
 			// 	forests: 0,
 			// 	dac: 0,
@@ -516,11 +538,24 @@ export default {
 	},
 
 	methods: {
-		pprintDim(dim){
+		getFracsForDim(dim) {
+			const fracs = {};
+			const functionForDim = {
+				cost: this.totalCostEstimate,
+				repurposedLand: this.landEstimate,
+				energyUsed: this.energyUsedEstimate,
+				energyProduced: this.energyProducedEstimate,
+			};
+			for (let sol of this.solutions) {
+				fracs[sol] = functionForDim[dim](sol) / this.getContextNumMax(dim);
+			}
+			return fracs;
+		},
+		pprintDim(dim) {
 			const mapping = {
-				'repurposedLand': 'Land*',
-				'energyUsed': 'Energy used',
-				'energyProduced': 'Energy produced'
+				repurposedLand: "Land*",
+				energyUsed: "Energy used",
+				energyProduced: "Energy produced",
 			};
 			return mapping[dim] || dim;
 		},
@@ -531,7 +566,7 @@ export default {
 			if (this.estimates[dim] === 0) {
 				return "";
 			}
-			const pct = Number(this.getContextNum(dim)*100).toFixed(0);
+			const pct = Number(this.getContextNum(dim) * 100).toFixed(0);
 
 			if (dim === "cost") {
 				return `${pct}% of United States GDP in 2020`;
@@ -548,14 +583,17 @@ export default {
 				return "";
 			}
 		},
-		getContextNum(dim){
+		getContextNum(dim) {
+			return this.estimates[dim] / this.getContextNumMax(dim);
+		},
+		getContextNumMax(dim) {
 			if (dim === "cost") {
-				return this.estimates[dim] / (21 * Math.pow(10, 12));
+				return 21 * Math.pow(10, 12);
 			} else if (dim === "repurposedLand") {
-				return this.estimates[dim] / (328.7 * MILLION);
+				return 328.7 * MILLION;
 			} else if (dim === "energyUsed" || dim === "energyProduced") {
-				return this.estimates[dim] / 31.7;
-			} 
+				return 31.7;
+			}
 		},
 		maxAllocForSolution(sol) {
 			return {
@@ -567,8 +605,7 @@ export default {
 				enhancedWeathering: 4 * BILLION,
 			}[sol];
 		},
-
-		getTooltip(sol){
+		getTooltip(sol) {
 			const tips = {
 				forests: `The oldest carbon removal trick in the book. Planting more trees is fairly
 					cheap, but it takes up a lot of land, uses a lot of water, and when the tree
@@ -583,8 +620,7 @@ export default {
 				blueCarbon: `Coastal blue carbon ecosystems like mangrove forests, seagrasses, and salt
 					marshes have soils that can store immense amounts of carbon due to anoxic
 					conditions, so protecting and restoring these ecosystems will have outsized
-					positive climate impact.`
-,
+					positive climate impact.`,
 				beccs: `Plant fast-growing trees or crops at scale, but instead of letting them die and
 					decompose (releasing their stored carbon), harvest and combust them to produce
 					bio-energy, capturing the CO2 released on the spot and then sequestering it.
@@ -691,9 +727,9 @@ export default {
 			const littles = {
 				scale: "tons",
 				cost: "USD",
-				repurposedLand: "ha",
-				energyUsed: "EJ",
-				energyProduced: "EJ",
+				repurposedLand: "hectares",
+				energyUsed: "exajoules",
+				energyProduced: "exajoules",
 			};
 
 			const prefix = key === "cost" ? "$" : "";
@@ -706,7 +742,7 @@ export default {
 		// Helper function for formatting big numbers.
 		formatNumber(value) {
 			var limits = [
-				{ limit: 1e12, suffix: "T" },			
+				{ limit: 1e12, suffix: "T" },
 				{ limit: 1e9, suffix: "B" },
 				{ limit: 1e6, suffix: "M" },
 				{ limit: 1e3, suffix: "k" },
@@ -723,6 +759,7 @@ export default {
 		},
 
 		nextPhase() {
+			console.log("clicked");
 			this.phaseInd++;
 			this.dialog = false;
 		},
@@ -766,32 +803,34 @@ export default {
 	font-size: 12px;
 }
 
-.news-header{
+.news-header {
 	font-weight: bold;
 	margin-top: 8px;
 }
 
-.context-text{
+.context-text {
 	font-size: 12px;
 	margin-top: 8px;
 }
 
-.tooltip-target{
+.tooltip-target {
 	cursor: pointer;
 }
 
-.solutions-grid{
-	display:grid; grid-template-columns: 1fr 3fr 1fr 3fr; grid-column-gap: 5%; grid-row-gap: 24px;
+.solutions-grid {
+	display: grid;
+	grid-template-columns: 1fr 3fr 1fr 3fr;
+	grid-column-gap: 5%;
+	grid-row-gap: 24px;
 }
 
-@media (max-width: 699px){
-	.solutions-grid{
+@media (max-width: 699px) {
+	.solutions-grid {
 		grid-template-columns: 1fr 3fr;
 	}
 
 	.big {
 		font-size: 1.5em;
 	}
-
 }
 </style>
