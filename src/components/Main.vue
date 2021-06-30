@@ -85,7 +85,7 @@
 			<v-col cols="12" :lg="6">
 				<h3>Solutions</h3>
 				<p class="bright mb-10">
-					Move the sliders until you achieve 10 Gigaton scale.
+					{{ goalMessage }}
 				</p>
 
 				<section class="solutions-grid">
@@ -116,6 +116,7 @@
 							thumb-label="always"
 							style="min-width: 200px"
 							persistent-hint
+							:validation="[tonsSequestered < TEN_BILLION || 'Scaled beyond 10 GT!']"
 						>
 							<span slot="thumb-label"
 								>{{ pprint("scale", tonsAllocated[solution]).big }}T</span
@@ -124,7 +125,8 @@
 					</template>
 
 					<div style="grid-column:1/3" v-if="phaseInd >= 1">
-						<p class="bright">What happens to captured CO2 ?</p>
+						<h3>NEW: What happens to captured CO2?</h3>
+						<br />
 						<v-slider
 							v-model="percentUtilization"
 							:min="0"
@@ -149,7 +151,7 @@
 			<v-col cols="12" :lg="6">
 				<h3>News simulation</h3>
 				<p class="bright">
-					Decarbonize without generating any dealbreakers.
+					Remove carbon without generating any dealbreakers.
 				</p>
 
 				<div class="news-header red" v-if="dealbreakers.length > 0">
@@ -157,6 +159,10 @@
 				</div>
 				<ul>
 					<li class="news" v-for="newsItem in dealbreakers" :key="newsItem.text">
+						<div
+							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
+							:style="{ background: colorForSolution[newsItem.solution] }"
+						></div>
 						{{ newsItem.text }}
 					</li>
 				</ul>
@@ -164,13 +170,22 @@
 				<div class="news-header" v-if="warnings.length > 0">Warning!</div>
 				<ul>
 					<li class="news" v-for="newsItem in warnings" :key="newsItem.text">
+						<div
+							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
+							:style="{ background: colorForSolution[newsItem.solution] }"
+						></div>
 						{{ newsItem.text }}
 					</li>
 				</ul>
 
 				<div class="news-header" v-if="goodNews.length > 0">Good news</div>
 				<ul>
+					<!-- :style="{ color: colorForSolution[newsItem.solution] }" -->
 					<li class="news" v-for="newsItem in goodNews" :key="newsItem.text">
+						<div
+							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
+							:style="{ background: colorForSolution[newsItem.solution] }"
+						></div>
 						{{ newsItem.text }}
 					</li>
 				</ul>
@@ -322,6 +337,13 @@ export default {
 				},
 			];
 		},
+		goalMessage() {
+			if (this.phaseInd === 0) {
+				return "Goal: Move the sliders to scale up different solutions until you achieve 10 Gigaton scale.";
+			} else {
+				return "Goal: Reach 10 gigatons with a high permanence solution. Hint: see the new slider below!";
+			}
+		},
 		headerCongratsMessage() {
 			if (this.phaseInd === 0) {
 				return "Congratulations! You reached 10 Gigatons with no major negative consequences! However...";
@@ -340,8 +362,16 @@ export default {
 				];
 			} else if (this.phaseInd === 1) {
 				return [
-					`Right now your solution costs $${this.estimates["cost"]}, converts ${this.estimates["repurposedLand"]} hectares of land to carbon removal, and uses ${this.estimates["energyUsed"]} exajoules of energy. Think you can do better? Give it another try!`,
+					`Your solution uses ${this.getContext("repurposedLand")}, ${this.getContext(
+						"energyUsed"
+					)}, and ${this.getContext(
+						"cost"
+					)}. Think you can do better? Give it another try!`,
 				];
+
+				// return [
+				// 	`Right now your solution costs $${this.estimates["cost"]}, converts ${this.estimates["repurposedLand"]} hectares of land to carbon removal, and uses ${this.estimates["energyUsed"]} exajoules of energy. Think you can do better? Give it another try!`,
+				// ];
 
 				// DOesn't work for some reason.
 				// return [`Right now your solution costs ${ this.pprint('cost', this.estimates['cost']).big } USD, converts ${ this.pprint('land', this.estimates['land']).big } hectares of land to carbon removal, and uses ${ this.pprint('energy', this.estimates['energy']).big } exajoules of energy. Think you can do better?`];
@@ -359,133 +389,160 @@ export default {
 				{
 					condition: this.tonsAllocated.forests > 0.75 * BILLION,
 					text: "Trees planted in the tropics have dramatically increased air quality!",
-					color: "green",
+					type: "good",
+					solution: "forests",
 				},
 				{
 					condition: this.tonsAllocated.forests > 2 * BILLION,
 					text:
 						"Some trees introduced for carbon removal have become an invasive species.",
-					color: "yellow",
+					type: "warning",
+					solution: "forests",
 				},
 				{
 					condition: this.tonsAllocated.forests > 2.5 * BILLION,
 					text:
 						"Wildfires burn down many of the trees that were used for carbon removal, releasing that CO2 back into the atmosphere!",
-					color: "yellow",
+					type: "warning",
+					solution: "forests",
 				},
 				{
 					condition: this.tonsAllocated.soil > 0.5 * BILLION,
 					text: "Soil health already improving dramatically.",
-					color: "green",
+					type: "good",
+					solution: "soil",
 				},
 				{
 					condition: this.tonsAllocated.soil > 1.5 * BILLION,
 					text:
 						"Regenerative agricultural practices phase out ammonia fertilizer, continuing to reduce CO2 emissions!",
-					color: "green",
+					type: "good",
+					solution: "soil",
 				},
 				{
 					condition: this.tonsAllocated.soil > 2 * BILLION,
 					text:
 						"Due to the mass adoption of regenerative practices, crop yields around the world have increased!",
-					color: "green",
+					type: "good",
+					solution: "soil",
 				},
 				{
 					condition: this.tonsAllocated.soil > 3 * BILLION,
 					text:
 						"Large groups of farmers begin to till their land again, releasing much of the carbon stored in these soils back into the atmosphere!",
-					color: "yellow",
+					type: "warning",
+					solution: "soil",
 				},
 				{
 					condition: this.tonsAllocated.soil > 4 * BILLION,
 					text:
 						"Land used for soil carbon sequestration is beginning to release methane into the atmosphere.",
-					color: "red",
+					type: "dealbreaker",
+					solution: "soil",
 				},
 				{
 					condition: this.tonsAllocated.beccs > 1 * BILLION,
 					text:
 						"Using waste biomass alone, BECCS provides enough energy to meet Australia’s energy demand!",
-					color: "green",
+					type: "good",
+					solution: "beccs",
 				},
 				{
 					condition: this.tonsAllocated.beccs > 3 * BILLION,
 					text:
 						"Running out of waste biomass to use for BECCS, so beginning to switch to growing dedicated energy crops. This will require much more land...",
-					color: "yellow",
+					type: "warning",
+					solution: "beccs",
 				},
 				{
 					condition: this.tonsAllocated.beccs > 6.5 * BILLION,
 					text:
 						"Despite using vast amounts of land to cultivate dedicated energy crops, BECCS provides enough energy to meet half of the US’s energy demand!",
-					color: "yellow",
+					type: "good",
+					solution: "beccs",
 				},
 				{
 					condition: this.estimates.repurposedLand > 1.2 * Math.pow(10, 8),
 					text:
 						"Too much land usage! Food prices skyrocket and food scarcity becomes a major worldwide problem as carbon removal takes up increasing land area.",
-					color: "red",
+					type: "dealbreaker",
+					solution: "forests",
 				},
 				{
 					condition: this.tonsAllocated.beccs + this.tonsAllocated.forests > 5 * BILLION,
 					text:
 						"Freshwater shortages become an international concern as newly planted forests and energy crops for BECCS consume ever increasing amounts of water.",
-					color: "red",
+					type: "dealbreaker",
+					solution: "beccs",
 				},
 				{
 					condition: this.tonsAllocated.blueCarbon > 0.25 * BILLION,
 					text:
 						"Restoration of coastal ecosystems has increased protection against yearly coastal flooding!",
-					color: "green",
+					type: "good",
+					solution: "blueCarbon",
 				},
 				{
 					condition: this.tonsAllocated.blueCarbon > 0.5 * BILLION,
 					text:
-						"Due to extensive protection for coastal restoration, the Western Mediterrean and the Gulf Coast regions have seen a decrease in tourism.",
-					color: "yellow",
+						"Coastal communities living near the mangroves feel insufficiently engaged in some of the decision making processes, so you'll need to continue to work with them individually to ensure environmental justice.",
+					type: "warning",
+					solution: "blueCarbon",
 				},
 				{
 					condition: this.tonsAllocated.blueCarbon > 0.75 * BILLION,
 					text:
 						"Coastal ecosystems provide a natural buffer against climate induced storms and natural disasters worldwide!",
-					color: "green",
+					type: "good",
+					solution: "blueCarbon",
 				},
 				{
 					condition: this.tonsAllocated.enhancedWeathering > 1 * BILLION,
 					text:
 						"Mining of rocks for weathering is already on the order of billions of tons, and grinding of the mined rock also requires very substantial energy.",
-					color: "yellow",
+					type: "challenge",
+					solution: "enhancedWeathering",
 				},
 				{
 					condition: this.tonsAllocated.enhancedWeathering > 2 * BILLION,
 					text:
 						"Agricultural yields increase from added mineral nutrients, which also help provide crops protection from pests and diseases.",
-					color: "green",
+					type: "good",
+					solution: "enhancedWeathering",
 				},
 				{
 					condition: this.tonsAllocated.dac > 1 * BILLION,
 					text:
 						"After lots of R&D work you've developed new advanced sorbent materials for capturing carbon and have mobilized global supply chains to produce modular DAC units. Costs of direct air capture are slowly beginning to come down.",
-					color: "green",
+					type: "good",
+					solution: "dac",
+				},
+				{
+					condition: this.tonsAllocated.dac > 4 * BILLION,
+					text:
+						"The use of fossil fuel energy for direct air capture is contributing to air pollution in front-line communities. Note that using renewables requires much more land per ton captured.",
+					type: "warning",
+					solution: "dac",
 				},
 				{
 					condition: this.estimates.energyUsed > 53,
 					text:
 						"Energy used for carbon removal makes up more than half of total US energy consumption in 2020!",
-					color: "red",
+					type: "dealbreaker",
+					solution: "dac",
 				},
 			];
 			return possibleNewsItems.filter(item => item.condition);
 		},
 
 		goodNews() {
-			return this.newsItems.filter(_ => _.color === "green");
+			return this.newsItems.filter(_ => _.type === "good");
 		},
 		warnings() {
-			return this.newsItems.filter(_ => _.color === "yellow");
+			return this.newsItems.filter(_ => _.type === "warning");
 		},
 		dealbreakers() {
-			return this.newsItems.filter(_ => _.color === "red");
+			return this.newsItems.filter(_ => _.type === "dealbreaker");
 		},
 
 		isLastPhase() {
@@ -504,14 +561,13 @@ export default {
 		return {
 			phaseNames: ["intro", "permanence"],
 			phaseInd: 0,
-
 			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
 			colorForSolution: {
 				forests: "green",
 				dac: "#ffc107",
 				beccs: "orange",
-				soil: "brown",
+				soil: "#795548",
 				blueCarbon: "#ADD8E6",
 				enhancedWeathering: "red",
 			},
@@ -566,8 +622,8 @@ export default {
 			if (this.estimates[dim] === 0) {
 				return "";
 			}
-			const pct = Number(this.getContextNum(dim) * 100).toFixed(0);
 
+			const pct = Number(this.getContextNum(dim) * 100).toFixed(1);
 			if (dim === "cost") {
 				return `${pct}% of United States GDP in 2020`;
 			} else if (dim === "repurposedLand") {
