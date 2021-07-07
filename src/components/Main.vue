@@ -8,13 +8,15 @@
 				<h2 class="font-weight-regular display-1 mb-16">
 					Carbon Removal Scale Up Challenge
 				</h2>
-
+				<h3>Instructions:</h3>
 				<p class="subheading font-weight-regular mr-8">
 					According to the IPCC (Intergovernmental Panel on Climate Change), we'll need to
-					remove 10 billion tons (or gigatons) of CO2 from the atmosphere by 2050. Choose
-					carbon removal approaches to scale up by moving the sliders below until you
-					reach 10 gigatons, but watch out for the land and energy you're using in the
-					process, along with other unintended consequences!
+					remove 10 billion tons (or gigatons) of CO2 from the atmosphere by 2050. Your
+					task is to choose carbon removal approaches to scale up by moving the colored
+					sliders below until you reach 10 gigatons, but without using too much land or
+					energy, and without causing any dire unintended consequences! You'll win the
+					game when you have reached 10 gigaton scale without having any dealbreakers in
+					the consequences panel!
 				</p>
 
 				<!-- 		<v-btn class="amber rounded-0 font-weight-black">
@@ -95,6 +97,7 @@
 								<div v-bind="attrs" v-on="on" class="tooltip-target">
 									<div class="solution-label">
 										{{ pprintSolution(solution) }}
+										<i class="fas fa-info-circle"></i>
 									</div>
 
 									<div class="solution-label">
@@ -125,7 +128,21 @@
 					</template>
 
 					<div style="grid-column:1/3" v-if="phaseInd >= 1">
-						<h3>NEW: What happens to captured CO2?</h3>
+						<v-tooltip right max-width="300" color="black">
+							<template v-slot:activator="{ on, attrs }">
+								<div v-bind="attrs" v-on="on" class="tooltip-target">
+									<h3>What happens to the captured CO<sub>2</sub>?</h3>
+									<i class="fas fa-info-circle"></i>
+								</div>
+							</template>
+							<span
+								>CO<sub>2</sub> captured with DAC or BECCS can either be sequestered
+								underground permanently, or utilized to make useful and profitable
+								products that will re-release the CO<sub>2</sub> back into the
+								atmosphere.</span
+							>
+						</v-tooltip>
+
 						<br />
 						<v-slider
 							v-model="percentUtilization"
@@ -149,7 +166,7 @@
 			</v-col>
 
 			<v-col cols="12" :lg="6">
-				<h3>News simulation</h3>
+				<h3>Scale-Up Consequences</h3>
 				<p class="bright">
 					Remove carbon without generating any dealbreakers.
 				</p>
@@ -215,9 +232,14 @@
 					<v-btn color="primary" text @click="nextPhase()" v-if="!isLastPhase">
 						Proceed to {{ phaseNames[phaseInd + 1] }} phase
 					</v-btn>
-					<v-btn color="primary" text @click="resetGame()" v-else>
-						Play again
-					</v-btn>
+					<div v-else>
+						<v-btn color="primary" text @click="stayHere()">
+							Stay here
+						</v-btn>
+						<v-btn color="primary" text @click="resetGame()">
+							Play again
+						</v-btn>
+					</div>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -358,7 +380,7 @@ export default {
 					`Only ${parseInt(
 						(100 * this.permanences[2].value) / this.tonsSequestered
 					)}% of the CO2 you removed has been stored long-term, and the rest will be re-emitted back into the atmosphere. In this next phase, modify your solution to be “high permanence”. You can monitor the permanence of your solution at top of the screen.`,
-					`Right now, half of the CO2 captured via DAC and BECCS is being stored permanently, but the other half is being used to make products that will be profitable and bring money into the industry, but will also release that CO2 back into the atmosphere on a short timeframe. You can modify the amount of CO2 being sequestered vs utilized with a new slider at the bottom of the screen.`,
+					`Right now, half of the CO2 captured via DAC and BECCS is being stored permanently. The other half is being used to make products that will be profitable and bring money into the industry, but will also release that CO2 back into the atmosphere on a short timeframe. You can modify the amount of CO2 being sequestered vs utilized with a new slider at the bottom of the screen.`,
 				];
 			} else if (this.phaseInd === 1) {
 				return [
@@ -500,7 +522,7 @@ export default {
 					condition: this.tonsAllocated.enhancedWeathering > 1 * BILLION,
 					text:
 						"Mining of rocks for weathering is already on the order of billions of tons, and grinding of the mined rock also requires very substantial energy.",
-					type: "challenge",
+					type: "warning",
 					solution: "enhancedWeathering",
 				},
 				{
@@ -566,7 +588,7 @@ export default {
 			colorForSolution: {
 				forests: "green",
 				dac: "#ffc107",
-				beccs: "orange",
+				beccs: "#b19cd9",
 				soil: "#795548",
 				blueCarbon: "#ADD8E6",
 				enhancedWeathering: "red",
@@ -609,7 +631,7 @@ export default {
 		},
 		pprintDim(dim) {
 			const mapping = {
-				repurposedLand: "Land*",
+				repurposedLand: "Land",
 				energyUsed: "Energy used",
 				energyProduced: "Energy produced",
 			};
@@ -672,7 +694,7 @@ export default {
 					cover crops, and maintaining a diverse crop rotation. Large-scale behavior
 					change is needed to scale up soil carbon sequestration, and if farmers end these
 					practices, the carbon will be released back into the atmosphere. However, soil
-					with more carbon stored in it is healthier and more and fertile.`,
+					with more carbon stored in it is healthier and more fertile.`,
 				blueCarbon: `Coastal blue carbon ecosystems like mangrove forests, seagrasses, and salt
 					marshes have soils that can store immense amounts of carbon due to anoxic
 					conditions, so protecting and restoring these ecosystems will have outsized
@@ -686,7 +708,7 @@ export default {
 					ambient air. Very energy-intensive and expensive to do, but the CO2 captured can
 					be permanently sequestered.`,
 				enhancedWeathering: `Mining abundant rocks like olivine that are chemically reactive with CO2, and
-					accelerating the rate at which these rocks react with atmospheric CO2.`,
+					accelerating the rate at which these rocks react with atmospheric CO2, permanently capturing and storing it.`,
 			};
 			return tips[sol];
 		},
@@ -823,6 +845,10 @@ export default {
 			this.phaseInd = 0;
 			this.dialog = false;
 			this.tonsAllocated = getInitialState();
+			this.percentUtilization = 50;
+		},
+		stayHere() {
+			this.dialog = false;
 		},
 	},
 };
