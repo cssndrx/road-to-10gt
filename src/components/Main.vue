@@ -8,7 +8,7 @@
 				<h2 class="font-weight-regular display-1 mb-16">
 					Carbon Removal Scale Up Challenge
 				</h2>
-				<h3>Instructions:</h3>
+				<h3>Instructions</h3>
 				<p class="subheading font-weight-regular mr-8">
 					According to the IPCC (Intergovernmental Panel on Climate Change), we'll need to
 					remove 10 billion tons (or gigatons) of CO2 from the atmosphere by 2050. Your
@@ -18,6 +18,11 @@
 					game when you have reached 10 gigaton scale without having any dealbreakers in
 					the consequences panel!
 				</p>
+
+				<h3>Active goals</h3>
+					<div :key="datum.text" v-for="datum in winCriteria" style="font-weight: bold">
+						{{datum.condition ? '❌': '✅' }} {{datum.text}}
+					</div>
 
 				<!-- 		<v-btn class="amber rounded-0 font-weight-black">
 			PLAY
@@ -65,10 +70,10 @@
 		<v-row>
 			<v-col cols="12" :lg="6">
 				<h3>Solutions</h3>
-				<p class="bright mb-10">
+<!-- 				<p class="bright mb-10">
 					{{ goalMessage }}
 				</p>
-
+ -->
 				<section class="solutions-grid">
 					<template v-for="solution in solutions">
 						<v-tooltip bottom :key="solution + 'label'" max-width="300" color="black">
@@ -142,7 +147,7 @@
 					<v-tooltip right max-width="300" color="black">
 						<template v-slot:activator="{ on, attrs }">
 							<div v-bind="attrs" v-on="on" class="tooltip-target">
-								<div class="context-text"><strong>What happens to the captured CO<sub>2</sub>?</strong><i class="fas fa-info-circle"></i></div>
+								<div class="context-text"><strong>What happens to the captured CO<sub>2</sub>?</strong><i class="fas fa-info-circle" style="margin-left:4px"></i></div>
 							</div>
 						</template>
 						<span
@@ -174,13 +179,13 @@
 			</v-col>
 
 			<v-col cols="12" :lg="6">
-				<h3>Scale-Up Consequences</h3>
-				<p class="bright">
+				<h3>Scale-up consequences</h3>
+<!-- 				<p class="bright">
 					Remove carbon without generating any dealbreakers.
 				</p>
-
-				<div class="news-header red" v-if="dealbreakers.length > 0">
-					Dealbreakers (you must resolve these to win)
+ -->
+				<div class="news-header" v-if="dealbreakers.length > 0">
+					Dealbreakers <span class="bright">(you must resolve these to win)</span>
 				</div>
 				<ul>
 					<li class="news" v-for="newsItem in dealbreakers" :key="newsItem.text">
@@ -309,24 +314,31 @@ export default {
 			}
 		},
 
-		isWin() {
-			if (this.tonsSequestered < TEN_BILLION) {
-				return false;
-			}
-			if (this.dealbreakers.length > 0) {
-				return false;
-			}
+		winCriteria(){
+			var criteria = [
+			{
+				condition: this.tonsSequestered < TEN_BILLION,
+				text: "Reach 10 gigatons of carbon removal",
+			},
+			{
+				condition: this.dealbreakers.length > 0,
+				text: "No dealbreaker scale-up consequences",
+			},
+			];
 
 			if (this.phaseInd >= 1) {
-				// Fail on Phase 1 conditions...
-				if (this.permanenceLabel !== "high") {
-					return false;
-				}
-				if (this.phaseInd >= 2) {
-					// Fail on Phase 2 conditions...
-				}
+				criteria.push(
+					{
+						condition: this.permanenceLabel !== "high",
+						text: "Achieve high permanence in stored carbon",
+					},
+				);
 			}
-			return true;
+			return criteria;
+
+		},
+		isWin() {
+			return this.winCriteria.filter(item => item.condition).length == 0;
 		},
 		estimates() {
 			// TODO(John): Return actual estimates.
@@ -590,7 +602,7 @@ export default {
 	data() {
 		return {
 			phaseNames: ["intro", "permanence"],
-			phaseInd: 1,
+			phaseInd: 0,
 			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
 			colorForSolution: {
@@ -867,7 +879,7 @@ export default {
 .bright {
 	color: #ecc400;
 	font-weight: bold;
-	font-size: 0.8em;
+/* 	font-size: 0.8em;*/
 }
 
 .big {
