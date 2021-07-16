@@ -49,27 +49,6 @@
 					{{ ((tonsSequestered / TEN_BILLION) * 100).toFixed(0) }}% of the way to 10GT
 				</div>
 
-				<div class="context-text" v-if="phaseInd > 0">
-					<strong
-						>Your solution has
-						<span class="bright" style="font-size: 1em; margin-top:28px">{{
-							permanenceLabel
-						}}</span>
-						permanence</strong
-					>
-					<div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;">
-						<template v-for="perm in permanences">
-							<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">
-								{{ perm.name }}
-							</div>
-							<ColorBar
-								:height="12"
-								:key="perm.name + 'bar'"
-								:frac="perm.value / TEN_BILLION"
-							></ColorBar>
-						</template>
-					</div>
-				</div>
 			</v-col>
 
 			<v-col cols="4" :lg="2" class="ma-lg-4" v-for="dim in dimensions" :key="dim">
@@ -113,7 +92,7 @@
 							:key="solution"
 							:max="maxAllocForSolution(solution)"
 							:min="minAlloc"
-							:thumb-size="24"
+							:thumb-size="16"
 							:color="colorForSolution[solution]"
 							:thumb-color="colorForSolution[solution]"
 							thumb-label="always"
@@ -121,48 +100,77 @@
 							persistent-hint
 							:validation="[tonsSequestered < TEN_BILLION || 'Scaled beyond 10 GT!']"
 						>
-							<span slot="thumb-label"
+							<span slot="thumb-label" class="thumb-label"
 								>{{ pprint("scale", tonsAllocated[solution]).big }}T</span
 							>
 						</v-slider>
 					</template>
 
-					<div style="grid-column:1/3" v-if="phaseInd >= 1">
-						<v-tooltip right max-width="300" color="black">
-							<template v-slot:activator="{ on, attrs }">
-								<div v-bind="attrs" v-on="on" class="tooltip-target">
-									<h3>What happens to the captured CO<sub>2</sub>?</h3>
-									<i class="fas fa-info-circle"></i>
-								</div>
-							</template>
-							<span
-								>CO<sub>2</sub> captured with DAC or BECCS can either be sequestered
-								underground permanently, or utilized to make useful and profitable
-								products that will re-release the CO<sub>2</sub> back into the
-								atmosphere.</span
-							>
-						</v-tooltip>
+				</section>
 
-						<br />
-						<v-slider
-							v-model="percentUtilization"
-							:min="0"
-							:max="100"
-							:thumb-size="24"
-							color="yellow"
-							thumb-color="amber"
-							thumb-label="always"
-							persistent-hint
+				<div v-if="phaseInd >= 1">
+
+					<h3>Permanence challenge</h3>
+
+					<div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 5%">
+
+
+					<div class="context-text">
+						<strong
+							>Your solution has
+							<span class="bright" style="font-size: 1em; margin-top:28px">{{
+								permanenceLabel
+							}}</span>
+							permanence</strong
 						>
-							<span slot="thumb-label">{{ percentUtilization }}%</span>
-						</v-slider>
-
-						<div class="context-text" style="position:relative; bottom: 36px">
-							{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}%
-							sequestered
+						<div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;">
+							<template v-for="perm in permanences">
+								<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">
+									{{ perm.name }}
+								</div>
+								<ColorBar
+									:height="12"
+									:key="perm.name + 'bar'"
+									:frac="perm.value / TEN_BILLION"
+								></ColorBar>
+							</template>
 						</div>
 					</div>
-				</section>
+
+
+					<div>
+					<v-tooltip right max-width="300" color="black">
+						<template v-slot:activator="{ on, attrs }">
+							<div v-bind="attrs" v-on="on" class="tooltip-target">
+								<div class="context-text"><strong>What happens to the captured CO<sub>2</sub>?</strong><i class="fas fa-info-circle"></i></div>
+							</div>
+						</template>
+						<span
+							>CO<sub>2</sub> captured with DAC or BECCS can either be sequestered
+							underground permanently, or utilized to make useful and profitable
+							products that will re-release the CO<sub>2</sub> back into the
+							atmosphere.</span
+						>
+					</v-tooltip>
+
+					<br />
+					<v-slider
+						v-model="percentUtilization"
+						:min="0"
+						:max="100"
+						:thumb-size="16"
+						color="yellow"
+						thumb-color="amber"
+						thumb-label="always"
+						persistent-hint
+					>
+						<span slot="thumb-label" class="thumb-label" style="white-space:nowrap; left: 76px">{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}%
+						sequestered</span>
+					</v-slider>
+					</div> 
+
+				</div> 
+			</div>
 			</v-col>
 
 			<v-col cols="12" :lg="6">
@@ -209,7 +217,7 @@
 			</v-col>
 		</v-row>
 
-		<v-dialog v-model="dialog" width="500">
+		<v-dialog v-model="dialog" width="500" persistent>
 			<v-card>
 				<v-card-title class="headline">
 					You win!
@@ -582,16 +590,16 @@ export default {
 	data() {
 		return {
 			phaseNames: ["intro", "permanence"],
-			phaseInd: 0,
+			phaseInd: 1,
 			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
 			colorForSolution: {
 				forests: "green",
-				dac: "#ffc107",
-				beccs: "#b19cd9",
+				dac: "#ADD8E6",
+				beccs: "#FF5722", // b19cd9
 				soil: "#795548",
-				blueCarbon: "#ADD8E6",
-				enhancedWeathering: "red",
+				blueCarbon: "#009688",
+				enhancedWeathering: "#3F51B5",
 			},
 			// tonsAllocated: {
 			// 	forests: 0,
@@ -904,6 +912,10 @@ export default {
 	grid-template-columns: 1fr 3fr 1fr 3fr;
 	grid-column-gap: 5%;
 	grid-row-gap: 24px;
+}
+
+.thumb-label{
+	position:relative; left: 16px; top:12px; font-size: 10px; text-align: left; font-weight:bold;
 }
 
 @media (max-width: 699px) {
