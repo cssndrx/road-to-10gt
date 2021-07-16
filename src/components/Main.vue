@@ -68,7 +68,7 @@
 		<!-- end top row -->
 
 		<v-row>
-			<v-col cols="12" :lg="6">
+			<v-col cols="6" :lg="4">
 				<h3>Solutions</h3>
 <!-- 				<p class="bright mb-10">
 					{{ goalMessage }}
@@ -178,7 +178,7 @@
 			</div>
 			</v-col>
 
-			<v-col cols="12" :lg="6">
+			<v-col cols="6">
 				<h3>Scale-up consequences</h3>
 <!-- 				<p class="bright">
 					Remove carbon without generating any dealbreakers.
@@ -921,7 +921,7 @@ export default {
 
 .solutions-grid {
 	display: grid;
-	grid-template-columns: 1fr 3fr 1fr 3fr;
+	grid-template-columns: 1fr 3fr;
 	grid-column-gap: 5%;
 	grid-row-gap: 24px;
 }
