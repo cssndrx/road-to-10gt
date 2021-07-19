@@ -120,9 +120,8 @@
 
 					<h3>Permanence challenge</h3>
 
-					<div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 5%">
-
-
+<v-row>
+<v-col>
 					<div class="context-text">
 						<strong
 							>Your solution has
@@ -144,13 +143,16 @@
 							</template>
 						</div>
 					</div>
+				</v-col>
+				</v-row>
 
 
-					<div>
+					<v-row>
+						<v-col>
 					<v-tooltip right max-width="300" color="black">
 						<template v-slot:activator="{ on, attrs }">
 							<div v-bind="attrs" v-on="on" class="tooltip-target">
-								<div class="context-text"><strong>What happens to the captured CO<sub>2</sub>?</strong><i class="fas fa-info-circle" style="margin-left:4px"></i></div>
+								<div class="context-text mb-5"><strong>What happens to the captured CO<sub>2</sub>?</strong><i class="fas fa-info-circle" style="margin-left:4px"></i></div>
 							</div>
 						</template>
 						<span
@@ -160,7 +162,10 @@
 							atmosphere.</span
 						>
 					</v-tooltip>
+				</v-col>
+				</v-row>
 
+				<v-row>
 					<v-slider
 						v-model="percentUtilization"
 						:min="0"
@@ -171,12 +176,13 @@
 						thumb-label="always"
 						persistent-hint
 					>
-						<span slot="thumb-label" class="thumb-label" style="white-space:nowrap; left: 76px">{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}%
-						sequestered</span>
+						<div slot="thumb-label" class="thumb-label" style="white-space:nowrap; left: 76px; bottom: 24px">
+							<div>{{ percentUtilization }}% utilized,</div>
+							<div>{{ 100 - percentUtilization }}% sequestered</div>
+						</div>
 					</v-slider>
-					</div> 
+					</v-row> 
 
-				</div> 
 			</div>
 			</v-col>
 
