@@ -19,6 +19,9 @@
 					the consequences panel!
 				</p>
 
+				<p class="subheading font-weight-regular mr-8"> Learn more about the model behind Road to 10Gt and find resources to join the carbon removal process <a>here</a>.
+				</p>
+
 				<h3>Active goals</h3>
 					<div :key="datum.text" v-for="datum in winCriteria" style="font-weight: bold">
 						{{datum.condition ? '❌': '✅' }} {{datum.text}}
@@ -30,7 +33,7 @@
  -->
 			</v-col>
 
-			<v-col :md="4">
+			<v-col :md="4" class="d-none d-md-flex">
 				<v-img
 					:src="require('../assets/world.png')"
 					style="max-width:300px; opacity: 0.4"
@@ -101,7 +104,7 @@
 							:color="colorForSolution[solution]"
 							:thumb-color="colorForSolution[solution]"
 							thumb-label="always"
-							style="min-width: 200px"
+							class="slider"
 							persistent-hint
 							:validation="[tonsSequestered < TEN_BILLION || 'Scaled beyond 10 GT!']"
 						>
@@ -113,7 +116,7 @@
 
 				</section>
 
-				<div v-if="phaseInd >= 1">
+				<div v-if="phaseInd >= 1" style="margin-top: 16px;">
 
 					<h3>Permanence challenge</h3>
 
@@ -158,7 +161,6 @@
 						>
 					</v-tooltip>
 
-					<br />
 					<v-slider
 						v-model="percentUtilization"
 						:min="0"
@@ -187,7 +189,7 @@
 				<div class="news-header" v-if="dealbreakers.length > 0">
 					Dealbreakers <span class="bright">(you must resolve these to win)</span>
 				</div>
-				<ul>
+				<ul class="my-ul">
 					<li class="news" v-for="newsItem in dealbreakers" :key="newsItem.text">
 						<div
 							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
@@ -198,7 +200,7 @@
 				</ul>
 
 				<div class="news-header" v-if="warnings.length > 0">Warning!</div>
-				<ul>
+				<ul class="my-ul">
 					<li class="news" v-for="newsItem in warnings" :key="newsItem.text">
 						<div
 							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
@@ -209,7 +211,7 @@
 				</ul>
 
 				<div class="news-header" v-if="goodNews.length > 0">Good news</div>
-				<ul>
+				<ul class="my-ul">
 					<!-- :style="{ color: colorForSolution[newsItem.solution] }" -->
 					<li class="news" v-for="newsItem in goodNews" :key="newsItem.text">
 						<div
@@ -222,6 +224,12 @@
 			</v-col>
 		</v-row>
 
+<!-- 		<v-row class="mt-6">
+			<div style="font-size: 12px">
+			Learn more about the model behind Road to 10Gt and find resources to join the carbon removal process <a>here</a>.
+			</div>
+		</v-row>
+ -->
 		<v-dialog v-model="dialog" width="500" persistent>
 			<v-card>
 				<v-card-title class="headline">
@@ -936,7 +944,20 @@ export default {
 	}
 
 	.big {
-		font-size: 1.5em;
+		font-size: 1.9em;
+	}
+
+	.caps-label {
+		font-size: 0.8em;
+	}
+
+	li{
+		font-size: 0.8em;
+	}
+	.my-ul{
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
 	}
 }
 </style>
