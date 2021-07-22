@@ -20,9 +20,9 @@
 				</p>
 
 				<h3>Active goals</h3>
-					<div :key="datum.text" v-for="datum in winCriteria" style="font-weight: bold">
-						{{datum.condition ? '❌': '✅' }} {{datum.text}}
-					</div>
+				<div :key="datum.text" v-for="datum in winCriteria" style="font-weight: bold">
+					{{ datum.condition ? "❌" : "✅" }} {{ datum.text }}
+				</div>
 
 				<!-- 		<v-btn class="amber rounded-0 font-weight-black">
 			PLAY
@@ -53,7 +53,6 @@
 				<div class="context-text">
 					{{ ((tonsSequestered / TEN_BILLION) * 100).toFixed(0) }}% of the way to 10GT
 				</div>
-
 			</v-col>
 
 			<v-col cols="4" :lg="2" class="ma-lg-4" v-for="dim in dimensions" :key="dim">
@@ -70,7 +69,7 @@
 		<v-row>
 			<v-col cols="6" :lg="4">
 				<h3>Solutions</h3>
-<!-- 				<p class="bright mb-10">
+				<!-- 				<p class="bright mb-10">
 					{{ goalMessage }}
 				</p>
  -->
@@ -110,77 +109,90 @@
 							>
 						</v-slider>
 					</template>
-
 				</section>
 
 				<div v-if="phaseInd >= 1">
-
 					<h3>Permanence challenge</h3>
 
 					<div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 5%">
+						<div class="context-text">
+							<strong
+								>Your solution has
+								<span class="bright" style="font-size: 1em; margin-top:28px">{{
+									permanenceLabel
+								}}</span>
+								permanence</strong
+							>
+							<div
+								style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;"
+							>
+								<template v-for="perm in permanences">
+									<div
+										style="font-size:12px; margin-top: 4px"
+										:key="'name' + perm.name"
+									>
+										{{ perm.name }}
+									</div>
+									<ColorBar
+										:height="12"
+										:key="perm.name + 'bar'"
+										:frac="perm.value / TEN_BILLION"
+									></ColorBar>
+								</template>
+							</div>
+						</div>
 
+						<div>
+							<v-tooltip right max-width="300" color="black">
+								<template v-slot:activator="{ on, attrs }">
+									<div v-bind="attrs" v-on="on" class="tooltip-target">
+										<div class="context-text">
+											<strong
+												>What happens to the captured
+												CO<sub>2</sub>?</strong
+											><i
+												class="fas fa-info-circle"
+												style="margin-left:4px"
+											></i>
+										</div>
+									</div>
+								</template>
+								<span
+									>CO<sub>2</sub> captured with DAC or BECCS can either be
+									geologically sequestered (stored underground permanently in rock
+									formations), or utilized to make useful and profitable products
+									that will re-release the CO<sub>2</sub> back into the
+									atmosphere.</span
+								>
+							</v-tooltip>
 
-					<div class="context-text">
-						<strong
-							>Your solution has
-							<span class="bright" style="font-size: 1em; margin-top:28px">{{
-								permanenceLabel
-							}}</span>
-							permanence</strong
-						>
-						<div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;">
-							<template v-for="perm in permanences">
-								<div style="font-size:12px; margin-top: 4px" :key="'name' + perm.name">
-									{{ perm.name }}
-								</div>
-								<ColorBar
-									:height="12"
-									:key="perm.name + 'bar'"
-									:frac="perm.value / TEN_BILLION"
-								></ColorBar>
-							</template>
+							<br />
+							<v-slider
+								v-model="percentUtilization"
+								:min="0"
+								:max="100"
+								:thumb-size="16"
+								color="yellow"
+								thumb-color="amber"
+								thumb-label="always"
+								persistent-hint
+							>
+								<span
+									slot="thumb-label"
+									class="thumb-label"
+									style="white-space:nowrap; left: 76px"
+									>{{ percentUtilization }}% utilized,
+									{{ 100 - percentUtilization }}% sequestered</span
+								>
+							</v-slider>
 						</div>
 					</div>
-
-
-					<div>
-					<v-tooltip right max-width="300" color="black">
-						<template v-slot:activator="{ on, attrs }">
-							<div v-bind="attrs" v-on="on" class="tooltip-target">
-								<div class="context-text"><strong>What happens to the captured CO<sub>2</sub>?</strong><i class="fas fa-info-circle" style="margin-left:4px"></i></div>
-							</div>
-						</template>
-						<span
-							>CO<sub>2</sub> captured with DAC or BECCS can either be sequestered
-							underground permanently, or utilized to make useful and profitable
-							products that will re-release the CO<sub>2</sub> back into the
-							atmosphere.</span
-						>
-					</v-tooltip>
-
-					<br />
-					<v-slider
-						v-model="percentUtilization"
-						:min="0"
-						:max="100"
-						:thumb-size="16"
-						color="yellow"
-						thumb-color="amber"
-						thumb-label="always"
-						persistent-hint
-					>
-						<span slot="thumb-label" class="thumb-label" style="white-space:nowrap; left: 76px">{{ percentUtilization }}% utilized, {{ 100 - percentUtilization }}%
-						sequestered</span>
-					</v-slider>
-					</div> 
-
-				</div> 
-			</div>
+				</div>
 			</v-col>
 
 			<v-col cols="6">
 				<h3>Scale-up consequences</h3>
-<!-- 				<p class="bright">
+				<!-- 				<p class="bright">
 					Remove carbon without generating any dealbreakers.
 				</p>
  -->
@@ -246,6 +258,11 @@
 						Proceed to {{ phaseNames[phaseInd + 1] }} phase
 					</v-btn>
 					<div v-else>
+						<v-btn color="primary" text @click="stayHere()">
+							<a :href="twitterLink" target="_blank" style="text-decoration: none"
+								>Tweet Results</a
+							>
+						</v-btn>
 						<v-btn color="primary" text @click="stayHere()">
 							Stay here
 						</v-btn>
@@ -314,28 +331,25 @@ export default {
 			}
 		},
 
-		winCriteria(){
+		winCriteria() {
 			var criteria = [
-			{
-				condition: this.tonsSequestered < TEN_BILLION,
-				text: "Reach 10 gigatons of carbon removal",
-			},
-			{
-				condition: this.dealbreakers.length > 0,
-				text: "No dealbreaker scale-up consequences",
-			},
+				{
+					condition: this.tonsSequestered < TEN_BILLION,
+					text: "Reach 10 gigatons of carbon removal",
+				},
+				{
+					condition: this.dealbreakers.length > 0,
+					text: "No dealbreaker scale-up consequences",
+				},
 			];
 
 			if (this.phaseInd >= 1) {
-				criteria.push(
-					{
-						condition: this.permanenceLabel !== "high",
-						text: "Achieve high permanence in stored carbon",
-					},
-				);
+				criteria.push({
+					condition: this.permanenceLabel !== "high",
+					text: "Achieve high permanence in stored carbon",
+				});
 			}
 			return criteria;
-
 		},
 		isWin() {
 			return this.winCriteria.filter(item => item.condition).length == 0;
@@ -378,6 +392,19 @@ export default {
 						impermanentTons * 0.4,
 				},
 			];
+		},
+		twitterLink() {
+			const msg = `I scaled up carbon removal to 10 gigatons using ${this.getContext(
+				"repurposedLand"
+			)}, ${this.getContext("energyUsed")}, and ${this.getContext(
+				"cost"
+			)}. Think you can do better?`;
+			return (
+				"http://twitter.com/share?url=" +
+				encodeURIComponent("https://www.roadto10gigatons.com") +
+				"&text=" +
+				encodeURIComponent(msg)
+			);
 		},
 		goalMessage() {
 			if (this.phaseInd === 0) {
@@ -560,6 +587,13 @@ export default {
 					solution: "dac",
 				},
 				{
+					condition: this.tonsAllocated.dac > 2 * BILLION,
+					text:
+						"Breakthroughs and mass mobilization of low-carbon energy sources that don't take up much land (like geothermal and nuclear) is needed for continued scale up.",
+					type: "warning",
+					solution: "dac",
+				},
+				{
 					condition: this.tonsAllocated.dac > 4 * BILLION,
 					text:
 						"The use of fossil fuel energy for direct air capture is contributing to air pollution in front-line communities. Note that using renewables requires much more land per ton captured.",
@@ -606,12 +640,12 @@ export default {
 			dimensions: ["cost", "repurposedLand", "energyUsed", "energyProduced"],
 			solutions: ["forests", "dac", "beccs", "soil", "blueCarbon", "enhancedWeathering"],
 			colorForSolution: {
-				forests: "green",
-				dac: "#ADD8E6",
-				beccs: "#FF5722", // b19cd9
+				forests: "#388E3C",
+				dac: "#B0BEC5",
+				beccs: "#F06292", // b19cd9
 				soil: "#795548",
-				blueCarbon: "#009688",
-				enhancedWeathering: "#3F51B5",
+				blueCarbon: "#42A5F5",
+				enhancedWeathering: "#673AB7",
 			},
 			// tonsAllocated: {
 			// 	forests: 0,
@@ -669,7 +703,7 @@ export default {
 			if (dim === "cost") {
 				return `${pct}% of United States GDP in 2020`;
 			} else if (dim === "repurposedLand") {
-				return `${pct}% the land area of India`;
+				return `${pct}% of the land area of India`;
 			} else if (dim === "energyUsed" || dim === "energyProduced") {
 				// const energyBreakpoints = {
 				// 	6.61: "California",
@@ -682,13 +716,20 @@ export default {
 			}
 		},
 		getContextNum(dim) {
+			if (dim === "cost") {
+				// bar should go up to 15% of US GDP
+				return (this.estimates[dim] / this.getContextNumMax(dim)) * 0.15;
+			} else if (dim === "repurposedLand") {
+				// bar should go up to 35% of India land area
+				return (this.estimates[dim] / this.getContextNumMax(dim)) * 0.35;
+			}
 			return this.estimates[dim] / this.getContextNumMax(dim);
 		},
 		getContextNumMax(dim) {
 			if (dim === "cost") {
-				return 21 * Math.pow(10, 12);
+				return 21 * Math.pow(10, 12) * 0.15; // bar should go up to 15% of US GDP
 			} else if (dim === "repurposedLand") {
-				return 328.7 * MILLION;
+				return 328.7 * MILLION * 0.35; // bar should go up to 35% of India land area
 			} else if (dim === "energyUsed" || dim === "energyProduced") {
 				return 31.7;
 			}
@@ -755,20 +796,33 @@ export default {
 				return 5.28995 * Math.pow(10, 7) * Math.pow(x, 0.4854);
 			};
 
+			const utilizationRevPerTon = 100; // in $/ton
+
+			const dacBase =
+				this.tonsAllocated.dac < BILLION
+					? 600 * this.tonsAllocated.dac
+					: 600 * BILLION +
+					  (dacIntegrated(this.tonsAllocated.dac) - dacIntegrated(BILLION));
+
+			const beccsBase =
+				this.tonsAllocated.beccs < 4 * BILLION
+					? 150 * this.tonsAllocated.beccs
+					: 150 * 4 * BILLION + 600 * (this.tonsAllocated.beccs - 4 * BILLION);
+
 			return {
 				forests: 20 * this.tonsAllocated.forests,
 				soil: 15 * this.tonsAllocated.soil,
 				blueCarbon: 30 * this.tonsAllocated.blueCarbon,
 				enhancedWeathering: 80 * this.tonsAllocated.enhancedWeathering,
+
 				dac:
-					this.tonsAllocated.dac < BILLION
-						? 600 * this.tonsAllocated.dac
-						: 600 * BILLION +
-						  (dacIntegrated(this.tonsAllocated.dac) - dacIntegrated(BILLION)),
+					dacBase -
+					this.tonsAllocated.dac * (this.percentUtilization / 100) * utilizationRevPerTon,
 				beccs:
-					this.tonsAllocated.beccs < 4 * BILLION
-						? 150 * this.tonsAllocated.beccs
-						: 150 * 4 * BILLION + 600 * (this.tonsAllocated.beccs - 4 * BILLION),
+					beccsBase -
+					this.tonsAllocated.beccs *
+						(this.percentUtilization / 100) *
+						utilizationRevPerTon,
 			}[sol];
 		},
 		landEstimate(sol) {
@@ -879,7 +933,7 @@ export default {
 .bright {
 	color: #ecc400;
 	font-weight: bold;
-/* 	font-size: 0.8em;*/
+	/* 	font-size: 0.8em;*/
 }
 
 .big {
@@ -926,8 +980,13 @@ export default {
 	grid-row-gap: 24px;
 }
 
-.thumb-label{
-	position:relative; left: 16px; top:12px; font-size: 10px; text-align: left; font-weight:bold;
+.thumb-label {
+	position: relative;
+	left: 16px;
+	top: 12px;
+	font-size: 10px;
+	text-align: left;
+	font-weight: bold;
 }
 
 @media (max-width: 699px) {
