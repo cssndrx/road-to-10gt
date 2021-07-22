@@ -19,6 +19,11 @@
 					the consequences panel!
 				</p>
 
+				<p class="subheading font-weight-regular mr-8">
+					Learn more about the model behind Road to 10Gt and find resources to join the
+					carbon removal process <a>here</a>.
+				</p>
+
 				<h3>Active goals</h3>
 				<div :key="datum.text" v-for="datum in winCriteria" style="font-weight: bold">
 					{{ datum.condition ? "❌" : "✅" }} {{ datum.text }}
@@ -30,7 +35,7 @@
  -->
 			</v-col>
 
-			<v-col :md="4">
+			<v-col :md="4" class="d-none d-md-flex">
 				<v-img
 					:src="require('../assets/world.png')"
 					style="max-width:300px; opacity: 0.4"
@@ -100,7 +105,7 @@
 							:color="colorForSolution[solution]"
 							:thumb-color="colorForSolution[solution]"
 							thumb-label="always"
-							style="min-width: 200px"
+							class="slider"
 							persistent-hint
 							:validation="[tonsSequestered < TEN_BILLION || 'Scaled beyond 10 GT!']"
 						>
@@ -111,42 +116,46 @@
 					</template>
 				</section>
 
-				<div v-if="phaseInd >= 1">
+				<div v-if="phaseInd >= 1" style="margin-top: 16px;">
 					<h3>Permanence challenge</h3>
 
-					<div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 5%">
-						<div class="context-text">
-							<strong
-								>Your solution has
-								<span class="bright" style="font-size: 1em; margin-top:28px">{{
-									permanenceLabel
-								}}</span>
-								permanence</strong
-							>
-							<div
-								style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;"
-							>
-								<template v-for="perm in permanences">
-									<div
-										style="font-size:12px; margin-top: 4px"
-										:key="'name' + perm.name"
-									>
-										{{ perm.name }}
-									</div>
-									<ColorBar
-										:height="12"
-										:key="perm.name + 'bar'"
-										:frac="perm.value / TEN_BILLION"
-									></ColorBar>
-								</template>
+					<v-row>
+						<v-col>
+							<div class="context-text">
+								<strong
+									>Your solution has
+									<span class="bright" style="font-size: 1em; margin-top:28px">{{
+										permanenceLabel
+									}}</span>
+									permanence</strong
+								>
+								<div
+									style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: end;"
+								>
+									<template v-for="perm in permanences">
+										<div
+											style="font-size:12px; margin-top: 4px"
+											:key="'name' + perm.name"
+										>
+											{{ perm.name }}
+										</div>
+										<ColorBar
+											:height="12"
+											:key="perm.name + 'bar'"
+											:frac="perm.value / TEN_BILLION"
+										></ColorBar>
+									</template>
+								</div>
 							</div>
-						</div>
+						</v-col>
+					</v-row>
 
-						<div>
+					<v-row>
+						<v-col>
 							<v-tooltip right max-width="300" color="black">
 								<template v-slot:activator="{ on, attrs }">
 									<div v-bind="attrs" v-on="on" class="tooltip-target">
-										<div class="context-text">
+										<div class="context-text mb-5">
 											<strong
 												>What happens to the captured
 												CO<sub>2</sub>?</strong
@@ -165,28 +174,30 @@
 									atmosphere.</span
 								>
 							</v-tooltip>
+						</v-col>
+					</v-row>
 
-							<br />
-							<v-slider
-								v-model="percentUtilization"
-								:min="0"
-								:max="100"
-								:thumb-size="16"
-								color="yellow"
-								thumb-color="amber"
-								thumb-label="always"
-								persistent-hint
+					<v-row>
+						<v-slider
+							v-model="percentUtilization"
+							:min="0"
+							:max="100"
+							:thumb-size="16"
+							color="yellow"
+							thumb-color="amber"
+							thumb-label="always"
+							persistent-hint
+						>
+							<div
+								slot="thumb-label"
+								class="thumb-label"
+								style="white-space:nowrap; left: 76px; bottom: 24px"
 							>
-								<span
-									slot="thumb-label"
-									class="thumb-label"
-									style="white-space:nowrap; left: 76px"
-									>{{ percentUtilization }}% utilized,
-									{{ 100 - percentUtilization }}% sequestered</span
-								>
-							</v-slider>
-						</div>
-					</div>
+								<div>{{ percentUtilization }}% utilized,</div>
+								<div>{{ 100 - percentUtilization }}% sequestered</div>
+							</div>
+						</v-slider>
+					</v-row>
 				</div>
 			</v-col>
 
@@ -199,7 +210,7 @@
 				<div class="news-header" v-if="dealbreakers.length > 0">
 					Dealbreakers <span class="bright">(you must resolve these to win)</span>
 				</div>
-				<ul>
+				<ul class="my-ul">
 					<li class="news" v-for="newsItem in dealbreakers" :key="newsItem.text">
 						<div
 							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
@@ -210,7 +221,7 @@
 				</ul>
 
 				<div class="news-header" v-if="warnings.length > 0">Warning!</div>
-				<ul>
+				<ul class="my-ul">
 					<li class="news" v-for="newsItem in warnings" :key="newsItem.text">
 						<div
 							style="display:inline-block;height: 20px; width: 20px; margin-right: 5px; position: relative; top: 5px;"
@@ -221,7 +232,7 @@
 				</ul>
 
 				<div class="news-header" v-if="goodNews.length > 0">Good news</div>
-				<ul>
+				<ul class="my-ul">
 					<!-- :style="{ color: colorForSolution[newsItem.solution] }" -->
 					<li class="news" v-for="newsItem in goodNews" :key="newsItem.text">
 						<div
@@ -234,6 +245,12 @@
 			</v-col>
 		</v-row>
 
+		<!-- 		<v-row class="mt-6">
+			<div style="font-size: 12px">
+			Learn more about the model behind Road to 10Gt and find resources to join the carbon removal process <a>here</a>.
+			</div>
+		</v-row>
+ -->
 		<v-dialog v-model="dialog" width="500" persistent>
 			<v-card>
 				<v-card-title class="headline">
@@ -995,7 +1012,20 @@ export default {
 	}
 
 	.big {
-		font-size: 1.5em;
+		font-size: 1.9em;
+	}
+
+	.caps-label {
+		font-size: 0.8em;
+	}
+
+	li {
+		font-size: 0.8em;
+	}
+	.my-ul {
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
 	}
 }
 </style>
