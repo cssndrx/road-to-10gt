@@ -13,10 +13,10 @@
 					According to the IPCC (Intergovernmental Panel on Climate Change), we'll need to
 					remove 10 billion tons (or gigatons) of CO2 from the atmosphere by 2050. Your
 					task is to choose carbon removal approaches to scale up by moving the colored
-					sliders below until you reach 10 gigatons. Monitor the consequences of your
-					solution choices via the 5 progress bars and "Scale-up conseuquences" panel.
-					Keep your eye on the Active goals list to see the requirements you'll need to
-					fulfill in order to win the game!
+					sliders below until you reach 10 gigatons. Monitor the effects of your solution
+					choices via the five progress bars and "Scale-up consequences" panel. Keep your
+					eye on the Active goals list to see the requirements you'll need to fulfill in
+					order to win the game!
 				</p>
 
 				<p class="subheading font-weight-regular mr-8">
@@ -368,7 +368,7 @@ export default {
 			if (this.phaseInd >= 1) {
 				criteria.push({
 					condition: this.permanenceLabel !== "high",
-					text: "Achieve a high permanence solution (see the bottom of the screen)",
+					text: "Achieve a high permanence solution (see bottom of the screen)",
 				});
 			}
 			return criteria;
