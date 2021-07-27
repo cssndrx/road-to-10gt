@@ -849,6 +849,10 @@ export default {
 		},
 		landEstimate(sol) {
 			// all estimates in ha / ton
+			console.log(
+				this.tonsAllocated.dac,
+				this.tonsAllocated.dac * 2.87904 * Math.pow(10, -4)
+			);
 			return {
 				forests: 0.11 * this.tonsAllocated.forests,
 				soil: 0, // no additional land use
@@ -856,7 +860,7 @@ export default {
 					this.tonsAllocated.beccs <= 4 * BILLION
 						? 0.003 * this.tonsAllocated.beccs
 						: 0.003 * 4 * BILLION + 0.06 * (this.tonsAllocated.beccs - 4 * BILLION),
-				dac: this.tonsAllocated.dac * Math.pow(2.87904, -4),
+				dac: this.tonsAllocated.dac * 2.87904 * Math.pow(10, -4),
 				blueCarbon: 0, //(1 / 4.78) * this.tonsAllocated.blueCarbon,
 				enhancedWeathering: (0.61 / 1000) * this.tonsAllocated.enhancedWeathering,
 			}[sol];
